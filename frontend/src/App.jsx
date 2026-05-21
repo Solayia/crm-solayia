@@ -4,6 +4,7 @@ import AppLayout from './components/layout/AppLayout';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import ProspectsList from './pages/ProspectsList';
+import ProspectDetail from './pages/ProspectDetail';
 
 function ProtectedRoute({ children }) {
   const { isAuthenticated } = useAuthStore();
@@ -24,6 +25,7 @@ export default function App() {
       <Route element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
         <Route index element={<Dashboard />} />
         <Route path="prospects" element={<ProspectsList />} />
+        <Route path="prospects/:id" element={<ProspectDetail />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
