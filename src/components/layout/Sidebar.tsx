@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { logoutAction } from '@/app/(auth)/login/actions';
 import {
   LayoutDashboard, Target, Users, FileText, FolderKanban,
   Settings, Building2, UsersRound, ChevronLeft, ChevronRight, LogOut, X,
@@ -117,9 +118,11 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
               <p className="text-sm font-medium text-white truncate">David Olie</p>
               <p className="text-xs text-slate-400 truncate">Admin</p>
             </div>
-            <button className="text-slate-400 hover:text-red-400 transition-colors p-1">
-              <LogOut className="w-4 h-4" />
-            </button>
+            <form action={logoutAction}>
+              <button type="submit" className="text-slate-400 hover:text-red-400 transition-colors p-1">
+                <LogOut className="w-4 h-4" />
+              </button>
+            </form>
           </div>
         ) : (
           <div className="flex justify-center">

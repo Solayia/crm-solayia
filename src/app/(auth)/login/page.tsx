@@ -1,31 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { loginAction } from './actions';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    // TODO: Remplacer par Supabase auth
-    if (email === 'dolie@solayia.fr' && password === 'admin123') {
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 800);
-    } else {
-      setError('Email ou mot de passe incorrect');
+    const formData = new FormData(e.currentTarget);
+    const result = await loginAction(formData);
+
+    if (result?.error) {
+      setError(result.error);
       setLoading(false);
     }
+    // Si pas d'erreur, la Server Action redirige vers /dashboard
   };
 
   return (
@@ -63,8 +59,7 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  name="email"
                   required
                   className="input-field pl-10"
                   placeholder="dolie@solayia.fr"
@@ -78,8 +73,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
                   type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  name="password"
                   required
                   className="input-field pl-10 pr-10"
                   placeholder="••••••••"
@@ -109,8 +103,8 @@ export default function LoginPage() {
           {/* Demo hint */}
           <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-100">
             <p className="text-xs text-gray-500">
-              <span className="font-medium text-gray-600">Mode demo :</span>{' '}
-              dolie@solayia.fr / admin123
+              <span className="font-medium text-gray-600">Identifiants :</span>{' '}
+              Utilisez le compte cree dans Supabase Dashboard
             </p>
           </div>
         </div>
