@@ -1,0 +1,495 @@
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import {
+  ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, MapPin,
+  User, Calendar, Clock, X, Plus, MessageSquare, PhoneCall, MailIcon,
+  MessageCircle, Bell, AlertTriangle, Briefcase, FileText, ChevronDown,
+} from 'lucide-react';
+import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
+import { PROSPECT_STATUTS, PROSPECT_URGENCES, TYPES_PRESTATION } from '@/lib/types';
+import type { ProspectStatut, ProspectUrgence } from '@/lib/types';
+import {
+  getProspect, getProfiles, updateProspect, deleteProspect,
+  getProspectInteractions, createInteraction, deleteInteraction,
+  getProspectDevis,
+} from '../actions';
+
+const INTERACTION_TYPES = [
+  { value: 'appel', label: 'Appel', icon: PhoneCall, color: 'text-green-600 bg-green-50' },
+  { value: 'email', label: 'Email', icon: MailIcon, color: 'text-blue-600 bg-blue-50' },
+  { value: 'rdv', label: 'RDV', icon: Calendar, color: 'text-purple-600 bg-purple-50' },
+  { value: 'note', label: 'Note / SMS', icon: MessageCircle, color: 'text-amber-600 bg-amber-50' },
+];
+
+export default function ProspectDetailPage() {
+  const params = useParams();
+  const router = useRouter();
+  const prospectId = params.id as string;
+
+  const [prospect, setProspect] = useState<any>(null);
+  const [profiles, setProfiles] = useState<any[]>([]);
+  const [interactions, setInteractions] = useState<any[]>([]);
+  const [devis, setDevis] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [showInteractionForm, setShowInteractionForm] = useState(false);
+  const [interactionLoading, setInteractionLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState<'info' | 'prestation' | 'historique'>('info');
+
+  // Form fields — Infos contact
+  const [nom, setNom] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [entreprise, setEntreprise] = useState('');
+  const [email, setEmail] = useState('');
+  const [telephone, setTelephone] = useState('');
+  const [source, setSource] = useState('');
+  const [assignedTo, setAssignedTo] = useState('');
+  const [statut, setStatut] = useState<ProspectStatut>('nouveau');
+  const [notes, setNotes] = useState('');
+
+  // Form fields — Prestation
+  const [typePrestation, setTypePrestation] = useState('');
+  const [descriptionPrestation, setDescriptionPrestation] = useState('');
+  const [adresseChantier, setAdresseChantier] = useState('');
+  const [tarifPropose, setTarifPropose] = useState('');
+  const [urgence, setUrgence] = useState<ProspectUrgence>('normale');
+  const [datePremierContact, setDatePremierContact] = useState('');
+  const [dateRelance, setDateRelance] = useState('');
+
+  const loadData = useCallback(async () => {
+    const [p, pr, inter, dev] = await Promise.all([
+      getProspect(prospectId),
+      getProfiles(),
+      getProspectInteractions(prospectId),
+      getProspectDevis(prospectId),
+    ]);
+    if (p) {
+      setProspect(p);
+      setNom(p.nom || '');
+      setPrenom(p.prenom || '');
+      setEntreprise(p.entreprise || '');
+      setEmail(p.email || '');
+      setTelephone(p.telephone || '');
+      setSource(p.source || '');
+      setAssignedTo(p.assigned_to || '');
+      setStatut(p.statut || 'nouveau');
+      setNotes(p.notes || '');
+      setTypePrestation(p.type_prestation || '');
+      setDescriptionPrestation(p.description_prestation || '');
+      setAdresseChantier(p.adresse_chantier || '');
+      setTarifPropose(p.tarif_propose ? String(p.tarif_propose) : '');
+      setUrgence(p.urgence || 'normale');
+      setDatePremierContact(p.date_premier_contact || '');
+      setDateRelance(p.date_relance || '');
+    }
+    setProfiles(pr);
+    setInteractions(inter);
+    setDevis(dev);
+    setLoading(false);
+  }, [prospectId]);
+
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleSave = async () => {
+    setSaving(true);
+    const formData = new FormData();
+    formData.set('nom', nom);
+    formData.set('prenom', prenom);
+    formData.set('entreprise', entreprise);
+    formData.set('email', email);
+    formData.set('telephone', telephone);
+    formData.set('source', source);
+    formData.set('assigned_to', assignedTo);
+    formData.set('statut', statut);
+    formData.set('notes', notes);
+    formData.set('type_prestation', typePrestation);
+    formData.set('description_prestation', descriptionPrestation);
+    formData.set('adresse_chantier', adresseChantier);
+    formData.set('tarif_propose', tarifPropose);
+    formData.set('urgence', urgence);
+    formData.set('date_premier_contact', datePremierContact);
+    formData.set('date_relance', dateRelance);
+
+    const result = await updateProspect(prospectId, formData);
+    setSaving(false);
+    if (!result.error) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!confirm(`Supprimer le prospect "${entreprise || nom}" ? Cette action est irreversible.`)) return;
+    const result = await deleteProspect(prospectId);
+    if (!result.error) {
+      router.push('/prospects');
+    } else {
+      alert(result.error);
+    }
+  };
+
+  const handleCreateInteraction = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setInteractionLoading(true);
+    const formData = new FormData(e.currentTarget);
+    formData.set('prospect_id', prospectId);
+    const result = await createInteraction(formData);
+    if (!result.error) {
+      setShowInteractionForm(false);
+      await loadData();
+    }
+    setInteractionLoading(false);
+  };
+
+  const handleDeleteInteraction = async (id: string) => {
+    if (!confirm('Supprimer cette interaction ?')) return;
+    await deleteInteraction(id, prospectId);
+    await loadData();
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (!prospect) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-500">Prospect introuvable</p>
+        <button onClick={() => router.push('/prospects')} className="btn-primary mt-4">Retour aux prospects</button>
+      </div>
+    );
+  }
+
+  const statutInfo = PROSPECT_STATUTS.find(s => s.value === statut);
+  const urgenceInfo = PROSPECT_URGENCES.find(u => u.value === urgence);
+  const isRelancePassee = dateRelance && new Date(dateRelance) < new Date();
+
+  return (
+    <div className="space-y-4 max-w-4xl">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <button onClick={() => router.push('/prospects')} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg shrink-0">
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center text-sm sm:text-base font-bold shrink-0">
+            {getInitials(entreprise || `${prenom} ${nom}`)}
+          </div>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{entreprise || `${prenom} ${nom}`}</h1>
+            <div className="flex items-center gap-2 flex-wrap">
+              {entreprise && <p className="text-sm text-gray-500">{prenom} {nom}</p>}
+              <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statutInfo?.color || 'bg-gray-100 text-gray-600'}`}>
+                {statutInfo?.label || statut}
+              </span>
+              {urgence !== 'normale' && (
+                <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${urgenceInfo?.color || ''}`}>
+                  {urgenceInfo?.label}
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 shrink-0">
+          <button onClick={handleDelete} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg" title="Supprimer">
+            <Trash2 className="w-5 h-5" />
+          </button>
+          <button onClick={handleSave} disabled={saving} className="btn-primary">
+            <Save className="w-4 h-4" />
+            <span className="hidden sm:inline">{saving ? 'Enregistrement...' : saved ? 'Enregistre !' : 'Enregistrer'}</span>
+            <span className="sm:hidden">{saving ? '...' : saved ? '✓' : 'Sauver'}</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Alerte relance */}
+      {isRelancePassee && (
+        <div className="flex items-center gap-3 bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-4 py-3 text-sm">
+          <Bell className="w-5 h-5 text-amber-500 shrink-0" />
+          <div>
+            <span className="font-semibold">Relance en retard !</span> Prevue le {formatDate(dateRelance)}
+          </div>
+        </div>
+      )}
+
+      {/* Tabs navigation mobile */}
+      <div className="flex items-center bg-gray-100 rounded-lg p-0.5 sm:hidden">
+        {[
+          { key: 'info' as const, label: 'Contact', icon: User },
+          { key: 'prestation' as const, label: 'Prestation', icon: Briefcase },
+          { key: 'historique' as const, label: 'Historique', icon: MessageSquare },
+        ].map(tab => (
+          <button
+            key={tab.key}
+            onClick={() => setActiveSection(tab.key)}
+            className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-md text-xs font-medium transition-colors ${
+              activeSection === tab.key ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'
+            }`}
+          >
+            <tab.icon className="w-3.5 h-3.5" />
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Section 1 : Infos contact + statut */}
+      <div className={`card p-5 sm:p-6 ${activeSection !== 'info' ? 'hidden sm:block' : ''}`}>
+        <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <User className="w-4 h-4 text-brand-600" />
+          Informations contact
+        </h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Nom *</label>
+              <input value={nom} onChange={(e) => setNom(e.target.value)} className="input-field" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Prenom</label>
+              <input value={prenom} onChange={(e) => setPrenom(e.target.value)} className="input-field" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Entreprise</label>
+            <input value={entreprise} onChange={(e) => setEntreprise(e.target.value)} className="input-field" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Mail className="w-3 h-3" /> Email</label>
+              <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> Telephone</label>
+              <input value={telephone} onChange={(e) => setTelephone(e.target.value)} className="input-field" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Statut</label>
+              <select value={statut} onChange={(e) => setStatut(e.target.value as ProspectStatut)} className="input-field">
+                {PROSPECT_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Source</label>
+              <select value={source} onChange={(e) => setSource(e.target.value)} className="input-field">
+                <option value="">—</option>
+                <option>Site web</option><option>Google Ads</option><option>Bouche a oreille</option>
+                <option>Recommandation</option><option>Salon professionnel</option><option>Reseaux sociaux</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Assigne a</label>
+              <select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} className="input-field">
+                <option value="">—</option>
+                {profiles.map((p) => (<option key={p.id} value={p.id}>{p.full_name}</option>))}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Notes internes</label>
+            <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-field" placeholder="Notes libres, remarques..." />
+          </div>
+        </div>
+      </div>
+
+      {/* Section 2 : Prestation & Tarif */}
+      <div className={`card p-5 sm:p-6 ${activeSection !== 'prestation' ? 'hidden sm:block' : ''}`}>
+        <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Briefcase className="w-4 h-4 text-brand-600" />
+          Prestation & Tarif
+        </h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Type de prestation</label>
+              <select value={typePrestation} onChange={(e) => setTypePrestation(e.target.value)} className="input-field">
+                <option value="">—</option>
+                {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
+                <Euro className="w-3 h-3" /> Tarif propose (EUR)
+              </label>
+              <input type="number" step="0.01" value={tarifPropose} onChange={(e) => setTarifPropose(e.target.value)} className="input-field" placeholder="0.00" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Description de la prestation</label>
+            <textarea value={descriptionPrestation} onChange={(e) => setDescriptionPrestation(e.target.value)} rows={3} className="input-field" placeholder="Detail de la prestation souhaitee ou proposee..." />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
+              <MapPin className="w-3 h-3" /> Adresse du chantier / intervention
+            </label>
+            <input value={adresseChantier} onChange={(e) => setAdresseChantier(e.target.value)} className="input-field" placeholder="Adresse complete" />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
+                <AlertTriangle className="w-3 h-3" /> Urgence
+              </label>
+              <select value={urgence} onChange={(e) => setUrgence(e.target.value as ProspectUrgence)} className="input-field">
+                {PROSPECT_URGENCES.map((u) => (<option key={u.value} value={u.value}>{u.label}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
+                <Calendar className="w-3 h-3" /> Premier contact
+              </label>
+              <input type="date" value={datePremierContact} onChange={(e) => setDatePremierContact(e.target.value)} className="input-field" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
+                <Bell className="w-3 h-3" /> Date de relance
+              </label>
+              <input type="date" value={dateRelance} onChange={(e) => setDateRelance(e.target.value)} className={`input-field ${isRelancePassee ? 'border-amber-400 bg-amber-50' : ''}`} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Section 3 : Historique des echanges */}
+      <div className={`card p-5 sm:p-6 ${activeSection !== 'historique' ? 'hidden sm:block' : ''}`}>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+            <MessageSquare className="w-4 h-4 text-brand-600" />
+            Historique des echanges ({interactions.length})
+          </h2>
+          <button onClick={() => setShowInteractionForm(true)} className="btn-primary text-xs px-3 py-1.5">
+            <Plus className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Ajouter</span>
+          </button>
+        </div>
+
+        {interactions.length === 0 ? (
+          <div className="text-center py-8">
+            <MessageSquare className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+            <p className="text-sm text-gray-400 mb-3">Aucun echange enregistre</p>
+            <button onClick={() => setShowInteractionForm(true)} className="text-sm text-brand-600 hover:text-brand-700 font-medium">
+              Ajouter le premier echange
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {interactions.map((inter) => {
+              const typeConfig = INTERACTION_TYPES.find(t => t.value === inter.type);
+              const TypeIcon = typeConfig?.icon || MessageSquare;
+              return (
+                <div key={inter.id} className="flex gap-3 group">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${typeConfig?.color || 'text-gray-500 bg-gray-50'}`}>
+                    <TypeIcon className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-xs font-semibold text-gray-900">{typeConfig?.label || inter.type}</span>
+                          <span className="text-[11px] text-gray-400">{formatDate(inter.date_interaction)}</span>
+                          {inter.created_by_profile && (
+                            <span className="text-[11px] text-gray-400">par {inter.created_by_profile.full_name}</span>
+                          )}
+                        </div>
+                        <p className="text-sm text-gray-600 mt-0.5 whitespace-pre-line">{inter.contenu}</p>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteInteraction(inter.id)}
+                        className="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1 shrink-0"
+                        title="Supprimer"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Section 4 : Devis lies */}
+      {devis.length > 0 && (
+        <div className="card p-5 sm:p-6">
+          <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+            <FileText className="w-4 h-4 text-brand-600" />
+            Devis ({devis.length})
+          </h2>
+          <div className="space-y-2">
+            {devis.map((d) => (
+              <div key={d.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg hover:border-brand-200 transition-colors">
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm font-mono">{d.numero}</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(d.montant_ttc)} TTC</span>
+                  <span className="text-xs text-gray-400">{formatDate(d.date_emission)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Meta */}
+      <p className="text-xs text-gray-400 text-center pb-4">
+        Cree le {formatDate(prospect.created_at)}
+        {prospect.updated_at && prospect.updated_at !== prospect.created_at && (
+          <> · Modifie le {formatDate(prospect.updated_at)}</>
+        )}
+      </p>
+
+      {/* Modal ajout interaction */}
+      {showInteractionForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowInteractionForm(false)}>
+          <div className="card p-5 sm:p-6 w-full sm:max-w-lg rounded-b-none sm:rounded-b-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Nouvel echange</h3>
+              <button onClick={() => setShowInteractionForm(false)} className="p-2 text-gray-400 hover:text-gray-600 -mr-2"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleCreateInteraction} className="space-y-4">
+              {/* Type selection as buttons */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Type d&apos;echange</label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {INTERACTION_TYPES.map((t) => (
+                    <label key={t.value} className="cursor-pointer">
+                      <input type="radio" name="type" value={t.value} required className="peer sr-only" defaultChecked={t.value === 'appel'} />
+                      <div className={`flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 border-gray-100 peer-checked:border-brand-500 peer-checked:bg-brand-50 transition-all hover:border-gray-200`}>
+                        <t.icon className="w-5 h-5 text-gray-500 peer-checked:text-brand-600" />
+                        <span className="text-xs font-medium text-gray-600">{t.label}</span>
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contenu *</label>
+                <textarea name="contenu" required rows={4} className="input-field" placeholder="Resumez l'echange : ce qui a ete dit, decide, la prochaine etape..." />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                <input name="date_interaction" type="datetime-local" defaultValue={new Date().toISOString().slice(0, 16)} className="input-field" />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button type="button" onClick={() => setShowInteractionForm(false)} className="btn-secondary flex-1 sm:flex-none">Annuler</button>
+                <button type="submit" disabled={interactionLoading} className="btn-primary flex-1 sm:flex-none">
+                  {interactionLoading ? 'Enregistrement...' : 'Enregistrer'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

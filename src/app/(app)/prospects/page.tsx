@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, LayoutGrid, List, Search, Upload, X } from 'lucide-react';
+import { Plus, LayoutGrid, List, Search, Upload, X, ChevronRight } from 'lucide-react';
 import ProspectKanban from '@/components/prospects/ProspectKanban';
 import { formatDate, getInitials } from '@/lib/utils';
 import type { ProspectStatut } from '@/lib/types';
 import { PROSPECT_STATUTS } from '@/lib/types';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { getProspects, getProfiles, createProspect, deleteProspect, updateProspectStatut } from './actions';
 
 type ViewMode = 'table' | 'kanban';
@@ -20,6 +21,7 @@ export default function ProspectsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const router = useRouter();
 
   const loadData = useCallback(async () => {
     const [p, pr] = await Promise.all([getProspects(), getProfiles()]);
@@ -150,27 +152,30 @@ export default function ProspectsPage() {
           {/* Mobile: card view */}
           <div className="space-y-3 md:hidden">
             {filtered.map((p) => (
-              <div key={p.id} className="card p-4">
+              <div key={p.id} className="card p-4 cursor-pointer hover:border-brand-200 transition-colors" onClick={() => router.push(`/prospects/${p.id}`)}>
                 <div className="flex items-start justify-between mb-2">
                   <div>
                     <p className="text-sm font-semibold text-gray-900">{p.entreprise}</p>
                     <p className="text-xs text-gray-500">{p.prenom} {p.nom}</p>
                   </div>
-                  {p.assigned_profile && (
-                    <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-bold shrink-0">
-                      {getInitials(p.assigned_profile.full_name)}
-                    </div>
-                  )}
+                  <div className="flex items-center gap-2 shrink-0">
+                    {p.assigned_profile && (
+                      <div className="w-7 h-7 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-bold">
+                        {getInitials(p.assigned_profile.full_name)}
+                      </div>
+                    )}
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
+                  </div>
                 </div>
                 {p.email && <p className="text-xs text-gray-400 mb-2">{p.email}</p>}
                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
                   <div className="flex items-center gap-2">
-                    <select value={p.statut} onChange={(e) => handleStatutChange(p.id, e.target.value as ProspectStatut)} className="text-xs border border-gray-200 rounded-full px-2.5 py-1 bg-white min-h-[32px]">
+                    <select value={p.statut} onChange={(e) => { e.stopPropagation(); handleStatutChange(p.id, e.target.value as ProspectStatut); }} onClick={(e) => e.stopPropagation()} className="text-xs border border-gray-200 rounded-full px-2.5 py-1 bg-white min-h-[32px]">
                       {PROSPECT_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
                     </select>
                     {p.source && <span className="text-[11px] text-gray-400 bg-gray-50 px-2 py-0.5 rounded">{p.source}</span>}
                   </div>
-                  <button onClick={() => handleDelete(p.id)} className="text-xs text-red-400 hover:text-red-600 p-1 min-h-[32px]">Supprimer</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }} className="text-xs text-red-400 hover:text-red-600 p-1 min-h-[32px]">Supprimer</button>
                 </div>
               </div>
             ))}
@@ -192,11 +197,11 @@ export default function ProspectsPage() {
                 </tr></thead>
                 <tbody className="divide-y divide-gray-50">
                   {filtered.map((p) => (
-                    <tr key={p.id} className="hover:bg-gray-50 transition-colors">
+                    <tr key={p.id} className="hover:bg-gray-50 transition-colors cursor-pointer" onClick={() => router.push(`/prospects/${p.id}`)}>
                       <td className="px-4 py-3"><p className="text-sm font-medium text-gray-900">{p.entreprise}</p></td>
                       <td className="px-4 py-3"><p className="text-sm text-gray-700">{p.prenom} {p.nom}</p><p className="text-xs text-gray-400">{p.email}</p></td>
                       <td className="px-4 py-3">
-                        <select value={p.statut} onChange={(e) => handleStatutChange(p.id, e.target.value as ProspectStatut)} className="text-xs border border-gray-200 rounded-full px-2 py-0.5 bg-white cursor-pointer">
+                        <select value={p.statut} onChange={(e) => { e.stopPropagation(); handleStatutChange(p.id, e.target.value as ProspectStatut); }} onClick={(e) => e.stopPropagation()} className="text-xs border border-gray-200 rounded-full px-2 py-0.5 bg-white cursor-pointer">
                           {PROSPECT_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
                         </select>
                       </td>
@@ -210,7 +215,12 @@ export default function ProspectsPage() {
                         ) : <span className="text-xs text-gray-400">—</span>}
                       </td>
                       <td className="px-4 py-3"><span className="text-xs text-gray-500">{formatDate(p.created_at)}</span></td>
-                      <td className="px-4 py-3 text-right"><button onClick={() => handleDelete(p.id)} className="text-xs text-red-400 hover:text-red-600">Supprimer</button></td>
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button onClick={(e) => { e.stopPropagation(); handleDelete(p.id); }} className="text-xs text-red-400 hover:text-red-600">Supprimer</button>
+                          <ChevronRight className="w-4 h-4 text-gray-300" />
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

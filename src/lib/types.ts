@@ -55,6 +55,29 @@ export interface Profile {
   created_at: string;
 }
 
+export type ProspectUrgence = 'basse' | 'normale' | 'haute' | 'urgente';
+
+export const PROSPECT_URGENCES: { value: ProspectUrgence; label: string; color: string }[] = [
+  { value: 'basse', label: 'Basse', color: 'bg-gray-100 text-gray-600' },
+  { value: 'normale', label: 'Normale', color: 'bg-blue-100 text-blue-700' },
+  { value: 'haute', label: 'Haute', color: 'bg-orange-100 text-orange-700' },
+  { value: 'urgente', label: 'Urgente', color: 'bg-red-100 text-red-700' },
+];
+
+export const TYPES_PRESTATION = [
+  'Creation site web',
+  'Refonte site web',
+  'Maintenance web',
+  'SEO / Referencement',
+  'Application web',
+  'E-commerce',
+  'Climatisation',
+  'Electricite',
+  'Plomberie',
+  'Multi-services',
+  'Autre',
+];
+
 export interface Prospect {
   id: string;
   nom: string;
@@ -67,7 +90,15 @@ export interface Prospect {
   notes: string | null;
   assigned_to: string | null;
   assigned_profile?: Profile;
+  type_prestation: string | null;
+  description_prestation: string | null;
+  adresse_chantier: string | null;
+  tarif_propose: number | null;
+  date_premier_contact: string | null;
+  date_relance: string | null;
+  urgence: ProspectUrgence;
   created_at: string;
+  updated_at: string;
 }
 
 export interface Client {
