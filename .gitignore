@@ -1,39 +1,32 @@
-# Dependencies
-node_modules/
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
 
-# Environment
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# env files
 .env
-.env.local
-.env.production
+.env*.local
 
-# Build
-dist/
-build/
-
-# Uploads
-backend/uploads/*
-!backend/uploads/.gitkeep
-
-# Logs
-*.log
-logs/
-
-# Temp
-/tmp/
-.temp/
-
-# OS
+# misc
 .DS_Store
-Thumbs.db
+*.pem
+npm-debug.log*
+*.tsbuildinfo
+next-env.d.ts
+
+# vercel
+.vercel
 
 # IDE
 .vscode/
 .idea/
-*.swp
-*.swo
 
-# Prisma
-backend/prisma/*.db
-
-# Coverage
-coverage/
+# coverage
+/coverage
