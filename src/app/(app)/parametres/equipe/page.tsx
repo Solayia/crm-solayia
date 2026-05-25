@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Shield, User, Trash2, Mail, Copy, Check } from 'lucide-react';
+import { Plus, Shield, User, Trash2, Mail, Copy, Check, UserPlus } from 'lucide-react';
 import { formatDate, getInitials } from '@/lib/utils';
 import { getProfiles, inviteMember, deleteMember, updateMemberRole } from './actions';
 
 export default function EquipePage() {
   const [showInvite, setShowInvite] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'membre'>('membre');
   const [profiles, setProfiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,13 +25,14 @@ export default function EquipePage() {
   useEffect(() => { loadData(); }, [loadData]);
 
   const handleInvite = async () => {
-    if (!inviteEmail) return;
+    if (!inviteEmail || !inviteName) return;
     setInviteLoading(true);
     setInviteResult(null);
-    const result = await inviteMember(inviteEmail, inviteRole);
+    const result = await inviteMember(inviteEmail, inviteName, inviteRole);
     setInviteResult(result);
-    if (result.success) {
+    if ('success' in result && result.success) {
       setInviteEmail('');
+      setInviteName('');
       await loadData();
     }
     setInviteLoading(false);
@@ -83,27 +85,44 @@ export default function EquipePage() {
       {showInvite && (
         <div className="card p-5">
           <h3 className="text-sm font-semibold text-gray-900 mb-4">Inviter un nouveau membre</h3>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-1">
-              <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <input
-                  type="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="input-field pl-9"
-                  placeholder="email@exemple.fr"
-                  onKeyDown={(e) => e.key === 'Enter' && handleInvite()}
-                />
+          <div className="space-y-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Nom complet *</label>
+                <div className="relative">
+                  <UserPlus className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="text"
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                    className="input-field pl-9"
+                    placeholder="Prenom Nom"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Email *</label>
+                <div className="relative">
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <input
+                    type="email"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                    className="input-field pl-9"
+                    placeholder="email@exemple.fr"
+                  />
+                </div>
               </div>
             </div>
-            <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as 'admin' | 'membre')} className="input-field w-auto">
-              <option value="membre">Membre</option>
-              <option value="admin">Admin</option>
-            </select>
-            <button onClick={handleInvite} disabled={inviteLoading || !inviteEmail} className="btn-primary whitespace-nowrap">
-              {inviteLoading ? 'Envoi...' : 'Envoyer l\'invitation'}
-            </button>
+            <div className="flex items-center gap-3">
+              <select value={inviteRole} onChange={(e) => setInviteRole(e.target.value as 'admin' | 'membre')} className="input-field w-auto">
+                <option value="membre">Membre</option>
+                <option value="admin">Admin</option>
+              </select>
+              <button onClick={handleInvite} disabled={inviteLoading || !inviteEmail || !inviteName} className="btn-primary whitespace-nowrap">
+                {inviteLoading ? 'Creation...' : 'Creer le compte'}
+              </button>
+            </div>
           </div>
 
           {/* Result message */}
@@ -124,7 +143,7 @@ export default function EquipePage() {
                   {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
                 </button>
               </div>
-              <p className="text-xs text-green-600 mt-2">Communiquez ce mot de passe au nouveau membre. Il pourra le changer dans ses parametres.</p>
+              <p className="text-xs text-green-600 mt-2">Communiquez ce mot de passe au nouveau membre pour sa premiere connexion.</p>
             </div>
           )}
 
