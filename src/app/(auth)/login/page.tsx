@@ -27,11 +27,11 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex">
       {/* Left: Form */}
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
+      <div className="flex-1 flex items-center justify-center px-4 sm:px-6 py-8 sm:py-12">
         <div className="w-full max-w-sm">
           {/* Logo */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2 mb-6">
+          <div className="mb-6 sm:mb-8">
+            <div className="flex items-center gap-2 mb-4 sm:mb-6">
               <div className="w-10 h-10 rounded-xl bg-brand-600 flex items-center justify-center">
                 <span className="text-white font-bold text-lg">S</span>
               </div>
@@ -40,8 +40,8 @@ export default function LoginPage() {
                 <span className="text-brand-600 text-sm ml-1 font-semibold">CRM</span>
               </div>
             </div>
-            <h1 className="text-2xl font-bold text-gray-900">Connexion</h1>
-            <p className="text-gray-500 mt-1">Accedez a votre espace de gestion</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Connexion</h1>
+            <p className="text-gray-500 mt-1 text-sm sm:text-base">Accedez a votre espace de gestion</p>
           </div>
 
           {/* Error */}
@@ -63,6 +63,7 @@ export default function LoginPage() {
                   required
                   className="input-field pl-10"
                   placeholder="dolie@solayia.fr"
+                  autoComplete="email"
                 />
               </div>
             </div>
@@ -77,11 +78,12 @@ export default function LoginPage() {
                   required
                   className="input-field pl-10 pr-10"
                   placeholder="••••••••"
+                  autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
