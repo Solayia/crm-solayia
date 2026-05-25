@@ -1,21 +1,53 @@
 'use client';
 
-import { useState } from 'react';
-import { Search, Plus, TrendingUp, Building2 } from 'lucide-react';
-import { mockClients } from '@/lib/mock-data';
+import { useState, useEffect, useCallback } from 'react';
+import { Search, Plus, TrendingUp, Building2, X } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
+import { getClients, createClientAction } from './actions';
 
 export default function ClientsPage() {
   const [search, setSearch] = useState('');
+  const [clients, setClients] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [showForm, setShowForm] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
 
-  const mrrTotal = mockClients.reduce((sum, c) => sum + c.mrr, 0);
+  const loadData = useCallback(async () => {
+    const data = await getClients();
+    setClients(data);
+    setLoading(false);
+  }, []);
 
-  const filtered = mockClients.filter((c) =>
+  useEffect(() => { loadData(); }, [loadData]);
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setFormLoading(true);
+    const formData = new FormData(e.currentTarget);
+    const result = await createClientAction(formData);
+    if (!result.error) {
+      setShowForm(false);
+      await loadData();
+    }
+    setFormLoading(false);
+  };
+
+  const mrrTotal = clients.reduce((sum: number, c: any) => sum + (c.mrr || 0), 0);
+
+  const filtered = clients.filter((c) =>
     !search ||
-    c.entreprise.toLowerCase().includes(search.toLowerCase()) ||
-    c.nom.toLowerCase().includes(search.toLowerCase()) ||
-    c.email.toLowerCase().includes(search.toLowerCase())
+    c.entreprise?.toLowerCase().includes(search.toLowerCase()) ||
+    c.nom?.toLowerCase().includes(search.toLowerCase()) ||
+    c.email?.toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -26,7 +58,7 @@ export default function ClientsPage() {
             <Building2 className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-2xl font-bold text-gray-900">{mockClients.length}</p>
+            <p className="text-2xl font-bold text-gray-900">{clients.length}</p>
             <p className="text-xs text-gray-500">Clients actifs</p>
           </div>
         </div>
@@ -62,61 +94,97 @@ export default function ClientsPage() {
             className="input-field pl-9"
           />
         </div>
-        <button className="btn-primary">
+        <button onClick={() => setShowForm(true)} className="btn-primary">
           <Plus className="w-4 h-4" />
           <span className="hidden sm:inline">Nouveau client</span>
         </button>
       </div>
 
+      {/* Modal creation */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setShowForm(false)}>
+          <div className="card p-6 w-full max-w-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Nouveau client</h3>
+              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+            </div>
+            <form onSubmit={handleCreate} className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label><input name="nom" required className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Prenom</label><input name="prenom" className="input-field" /></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Entreprise *</label><input name="entreprise" required className="input-field" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input name="email" type="email" className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label><input name="telephone" className="input-field" /></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">MRR (€/mois)</label><input name="mrr" type="number" step="0.01" defaultValue="0" className="input-field" /></div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Notes</label><textarea name="notes" rows={2} className="input-field" /></div>
+              <div className="flex justify-end gap-2 pt-2">
+                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary">Annuler</button>
+                <button type="submit" disabled={formLoading} className="btn-primary">{formLoading ? 'Creation...' : 'Creer'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-100">
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Client</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Contact</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Telephone</th>
-                <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">MRR</th>
-                <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Depuis</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {filtered.map((client) => (
-                <tr key={client.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
-                        {getInitials(client.entreprise)}
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-gray-900">{client.entreprise}</p>
-                        {client.notes && <p className="text-xs text-gray-400 line-clamp-1">{client.notes}</p>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="text-sm text-gray-700">{client.prenom} {client.nom}</p>
-                    <p className="text-xs text-gray-400">{client.email}</p>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-sm text-gray-600">{client.telephone}</span>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <span className="text-sm font-semibold text-green-600">{formatCurrency(client.mrr)}/mois</span>
-                  </td>
-                  <td className="px-4 py-3">
-                    <span className="text-xs text-gray-500">{formatDate(client.created_at)}</span>
-                  </td>
+      {filtered.length === 0 ? (
+        <div className="card p-12 text-center">
+          <p className="text-gray-400 text-sm mb-3">Aucun client{search ? ' pour cette recherche' : ''}</p>
+          {!search && <button onClick={() => setShowForm(true)} className="btn-primary"><Plus className="w-4 h-4" />Ajouter un client</button>}
+        </div>
+      ) : (
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100">
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Client</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Contact</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Telephone</th>
+                  <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">MRR</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Depuis</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {filtered.map((client) => (
+                  <tr key={client.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
+                          {getInitials(client.entreprise)}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-gray-900">{client.entreprise}</p>
+                          {client.notes && <p className="text-xs text-gray-400 line-clamp-1">{client.notes}</p>}
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p className="text-sm text-gray-700">{client.prenom} {client.nom}</p>
+                      <p className="text-xs text-gray-400">{client.email}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-sm text-gray-600">{client.telephone || '—'}</span>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <span className="text-sm font-semibold text-green-600">{formatCurrency(client.mrr || 0)}/mois</span>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className="text-xs text-gray-500">{formatDate(client.created_at)}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
+            {filtered.length} client{filtered.length > 1 ? 's' : ''}
+          </div>
         </div>
-        <div className="px-4 py-3 border-t border-gray-100 text-xs text-gray-500">
-          {filtered.length} client{filtered.length > 1 ? 's' : ''}
-        </div>
-      </div>
+      )}
     </div>
   );
 }
