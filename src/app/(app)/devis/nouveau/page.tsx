@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, Plus, Trash2, Save, Send } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { formatCurrency } from '@/lib/utils';
-import { mockProspects, mockClients } from '@/lib/mock-data';
+import { getDestinataires, createDevisAction } from '../actions';
 
 interface LigneDevis {
   id: number;
@@ -15,13 +16,25 @@ interface LigneDevis {
 }
 
 export default function NouveauDevisPage() {
+  const router = useRouter();
   const [destinataireType, setDestinataireType] = useState<'prospect' | 'client'>('prospect');
   const [destinataireId, setDestinataireId] = useState('');
   const [conditions, setConditions] = useState('Paiement a 30 jours fin de mois');
   const [notes, setNotes] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [prospects, setProspects] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
   const [lignes, setLignes] = useState<LigneDevis[]>([
     { id: 1, designation: '', description: '', quantite: 1, prix_unitaire: 0 },
   ]);
+
+  const loadDestinataires = useCallback(async () => {
+    const data = await getDestinataires();
+    setProspects(data.prospects);
+    setClients(data.clients);
+  }, []);
+
+  useEffect(() => { loadDestinataires(); }, [loadDestinataires]);
 
   const addLigne = () => {
     setLignes([...lignes, { id: Date.now(), designation: '', description: '', quantite: 1, prix_unitaire: 0 }]);
@@ -40,8 +53,28 @@ export default function NouveauDevisPage() {
   const totalTTC = totalHT + tva;
 
   const destinataires = destinataireType === 'prospect'
-    ? mockProspects.map((p) => ({ id: p.id, label: p.entreprise }))
-    : mockClients.map((c) => ({ id: c.id, label: c.entreprise }));
+    ? prospects.map((p) => ({ id: p.id, label: p.entreprise }))
+    : clients.map((c) => ({ id: c.id, label: c.entreprise }));
+
+  const handleSave = async (statut: 'brouillon' | 'envoye') => {
+    if (!destinataireId) { alert('Veuillez selectionner un destinataire'); return; }
+    if (!lignes.some((l) => l.designation)) { alert('Ajoutez au moins une ligne'); return; }
+    setSaving(true);
+    const result = await createDevisAction({
+      prospect_id: destinataireType === 'prospect' ? destinataireId : null,
+      client_id: destinataireType === 'client' ? destinataireId : null,
+      conditions,
+      notes,
+      lignes: lignes.filter((l) => l.designation),
+      statut,
+    });
+    setSaving(false);
+    if (result.error) {
+      alert('Erreur: ' + result.error);
+    } else {
+      router.push('/devis');
+    }
+  };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -57,13 +90,13 @@ export default function NouveauDevisPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button className="btn-secondary">
+          <button onClick={() => handleSave('brouillon')} disabled={saving} className="btn-secondary">
             <Save className="w-4 h-4" />
-            Brouillon
+            {saving ? 'Enregistrement...' : 'Brouillon'}
           </button>
-          <button className="btn-primary">
+          <button onClick={() => handleSave('envoye')} disabled={saving} className="btn-primary">
             <Send className="w-4 h-4" />
-            Envoyer
+            {saving ? 'Enregistrement...' : 'Envoyer'}
           </button>
         </div>
       </div>
@@ -108,7 +141,7 @@ export default function NouveauDevisPage() {
         </div>
 
         <div className="space-y-3">
-          {lignes.map((ligne, idx) => (
+          {lignes.map((ligne) => (
             <div key={ligne.id} className="grid grid-cols-12 gap-3 items-start p-3 bg-gray-50 rounded-lg">
               <div className="col-span-12 sm:col-span-5">
                 <label className="block text-[11px] font-medium text-gray-500 mb-1">Designation</label>

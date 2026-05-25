@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { usePathname } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import Header from '@/components/layout/Header';
+import { getCurrentUser } from './actions';
 
 const pageTitles: Record<string, { title: string; subtitle?: string }> = {
   '/dashboard': { title: 'Dashboard', subtitle: 'Vue d\'ensemble de votre activite' },
@@ -18,7 +19,15 @@ const pageTitles: Record<string, { title: string; subtitle?: string }> = {
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const pathname = usePathname();
+
+  const loadUser = useCallback(async () => {
+    const u = await getCurrentUser();
+    setUser(u);
+  }, []);
+
+  useEffect(() => { loadUser(); }, [loadUser]);
 
   const matchedKey = Object.keys(pageTitles).find((key) => pathname.startsWith(key));
   const pageInfo = matchedKey ? pageTitles[matchedKey] : { title: 'CRM Solayia' };
@@ -30,6 +39,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
         mobileOpen={mobileOpen}
         onMobileClose={() => setMobileOpen(false)}
+        user={user}
       />
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         <Header

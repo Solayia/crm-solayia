@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { cn, getInitials } from '@/lib/utils';
 import { logoutAction } from '@/app/(auth)/login/actions';
 import {
   LayoutDashboard, Target, Users, FileText, FolderKanban,
@@ -30,10 +30,15 @@ interface SidebarProps {
   onToggle: () => void;
   mobileOpen: boolean;
   onMobileClose: () => void;
+  user?: { full_name: string; role: string; email: string } | null;
 }
 
-export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose, user }: SidebarProps) {
   const pathname = usePathname();
+
+  const userName = user?.full_name || 'Utilisateur';
+  const userRole = user?.role === 'admin' ? 'Admin' : 'Membre';
+  const userInitials = getInitials(userName);
 
   const isActive = (href: string) => {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -112,11 +117,11 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
         {!collapsed ? (
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
-              DO
+              {userInitials}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">David Olie</p>
-              <p className="text-xs text-slate-400 truncate">Admin</p>
+              <p className="text-sm font-medium text-white truncate">{userName}</p>
+              <p className="text-xs text-slate-400 truncate">{userRole}</p>
             </div>
             <form action={logoutAction}>
               <button type="submit" className="text-slate-400 hover:text-red-400 transition-colors p-1">
@@ -125,10 +130,15 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
             </form>
           </div>
         ) : (
-          <div className="flex justify-center">
-            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold">
-              DO
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-brand-600 flex items-center justify-center text-white text-xs font-bold" title={userName}>
+              {userInitials}
             </div>
+            <form action={logoutAction}>
+              <button type="submit" className="text-slate-400 hover:text-red-400 transition-colors p-1">
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </form>
           </div>
         )}
       </div>
