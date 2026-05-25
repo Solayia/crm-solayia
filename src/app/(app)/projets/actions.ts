@@ -44,6 +44,32 @@ export async function createProjetAction(formData: FormData) {
   return { success: true };
 }
 
+export async function updateProjetAction(id: string, formData: FormData) {
+  const supabase = await createClient();
+
+  const updates: Record<string, unknown> = {
+    nom: formData.get('nom') as string,
+    description: formData.get('description') as string || null,
+    statut: formData.get('statut') as ProjetStatut,
+    date_debut: formData.get('date_debut') as string || new Date().toISOString().split('T')[0],
+    date_fin_prevue: formData.get('date_fin_prevue') as string || null,
+    montant: parseFloat(formData.get('montant') as string) || 0,
+  };
+
+  // Allow changing client only if provided
+  const clientId = formData.get('client_id') as string;
+  if (clientId) updates.client_id = clientId;
+
+  const { error } = await supabase.from('projets').update(updates).eq('id', id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/projets');
+  revalidatePath('/clients');
+  revalidatePath('/dashboard');
+  return { success: true };
+}
+
 export async function updateProjetStatut(id: string, statut: ProjetStatut) {
   const supabase = await createClient();
   const { error } = await supabase.from('projets').update({ statut }).eq('id', id);

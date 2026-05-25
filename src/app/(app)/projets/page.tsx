@@ -5,7 +5,7 @@ import { Search, Plus, Calendar, Clock, X } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import { PROJET_STATUTS } from '@/lib/types';
 import type { ProjetStatut } from '@/lib/types';
-import { getProjets, getClientsForSelect, createProjetAction, updateProjetStatut, deleteProjet } from './actions';
+import { getProjets, getClientsForSelect, createProjetAction, updateProjetAction, updateProjetStatut, deleteProjet } from './actions';
 
 export default function ProjetsPage() {
   const [search, setSearch] = useState('');
@@ -14,6 +14,7 @@ export default function ProjetsPage() {
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
+  const [editProjet, setEditProjet] = useState<any>(null);
   const [formLoading, setFormLoading] = useState(false);
 
   const loadData = useCallback(async () => {
@@ -25,19 +26,29 @@ export default function ProjetsPage() {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormLoading(true);
     const formData = new FormData(e.currentTarget);
-    const result = await createProjetAction(formData);
-    if (!result.error) {
-      setShowForm(false);
-      await loadData();
+
+    if (editProjet?.id) {
+      const result = await updateProjetAction(editProjet.id, formData);
+      if (!result.error) {
+        setEditProjet(null);
+        await loadData();
+      }
+    } else {
+      const result = await createProjetAction(formData);
+      if (!result.error) {
+        setShowForm(false);
+        await loadData();
+      }
     }
     setFormLoading(false);
   };
 
-  const handleStatutChange = async (id: string, statut: ProjetStatut) => {
+  const handleStatutChange = async (e: React.MouseEvent, id: string, statut: ProjetStatut) => {
+    e.stopPropagation();
     await updateProjetStatut(id, statut);
     await loadData();
   };
@@ -45,6 +56,7 @@ export default function ProjetsPage() {
   const handleDelete = async (id: string) => {
     if (!confirm('Supprimer ce projet ?')) return;
     await deleteProjet(id);
+    setEditProjet(null);
     await loadData();
   };
 
@@ -56,6 +68,9 @@ export default function ProjetsPage() {
 
   const enCours = projets.filter((p: any) => p.statut === 'en_cours');
   const montantTotal = projets.reduce((s: number, p: any) => s + (p.montant || 0), 0);
+
+  const isModalOpen = showForm || editProjet;
+  const closeModal = () => { setShowForm(false); setEditProjet(null); };
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" /></div>;
@@ -102,32 +117,55 @@ export default function ProjetsPage() {
         </div>
       </div>
 
-      {/* Modal creation — bottom-sheet on mobile */}
-      {showForm && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowForm(false)}>
+      {/* Modal creation/edition — bottom-sheet on mobile */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={closeModal}>
           <div className="card p-5 sm:p-6 w-full sm:max-w-lg rounded-b-none sm:rounded-b-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold">Nouveau projet</h3>
-              <button onClick={() => setShowForm(false)} className="p-2 text-gray-400 hover:text-gray-600 -mr-2"><X className="w-5 h-5" /></button>
+              <h3 className="text-lg font-semibold">{editProjet ? 'Modifier le projet' : 'Nouveau projet'}</h3>
+              <button onClick={closeModal} className="p-2 text-gray-400 hover:text-gray-600 -mr-2"><X className="w-5 h-5" /></button>
             </div>
-            <form onSubmit={handleCreate} className="space-y-3">
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Nom du projet *</label><input name="nom" required className="input-field" /></div>
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nom du projet *</label>
+                <input name="nom" required defaultValue={editProjet?.nom || ''} className="input-field" />
+              </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Client *</label>
-                <select name="client_id" required className="input-field">
+                <select name="client_id" required defaultValue={editProjet?.client_id || editProjet?.client?.id || ''} className="input-field">
                   <option value="">Selectionner...</option>
                   {clients.map((c) => (<option key={c.id} value={c.id}>{c.entreprise}</option>))}
                 </select>
               </div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Description</label><textarea name="description" rows={2} className="input-field" /></div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Date debut</label><input name="date_debut" type="date" className="input-field" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Date fin prevue</label><input name="date_fin_prevue" type="date" className="input-field" /></div>
+              {editProjet && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                  <select name="statut" defaultValue={editProjet.statut} className="input-field">
+                    {PROJET_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
+                  </select>
+                </div>
+              )}
+              {!editProjet && <input type="hidden" name="statut" value="en_preparation" />}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea name="description" rows={3} defaultValue={editProjet?.description || ''} className="input-field" />
               </div>
-              <div><label className="block text-sm font-medium text-gray-700 mb-1">Montant (EUR)</label><input name="montant" type="number" step="0.01" defaultValue="0" className="input-field" /></div>
+              <div className="grid grid-cols-2 gap-3">
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Date debut</label><input name="date_debut" type="date" defaultValue={editProjet?.date_debut || ''} className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Date fin prevue</label><input name="date_fin_prevue" type="date" defaultValue={editProjet?.date_fin_prevue || ''} className="input-field" /></div>
+              </div>
+              <div><label className="block text-sm font-medium text-gray-700 mb-1">Montant (EUR)</label><input name="montant" type="number" step="0.01" defaultValue={editProjet?.montant || 0} className="input-field" /></div>
               <div className="flex gap-2 pt-2">
-                <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 sm:flex-none">Annuler</button>
-                <button type="submit" disabled={formLoading} className="btn-primary flex-1 sm:flex-none">{formLoading ? 'Creation...' : 'Creer'}</button>
+                {editProjet && (
+                  <button type="button" onClick={() => handleDelete(editProjet.id)} className="text-red-500 hover:text-red-700 text-sm px-3 py-2">
+                    Supprimer
+                  </button>
+                )}
+                <div className="flex-1" />
+                <button type="button" onClick={closeModal} className="btn-secondary flex-1 sm:flex-none">Annuler</button>
+                <button type="submit" disabled={formLoading} className="btn-primary flex-1 sm:flex-none">
+                  {formLoading ? 'Enregistrement...' : editProjet ? 'Modifier' : 'Creer'}
+                </button>
               </div>
             </form>
           </div>
@@ -145,7 +183,7 @@ export default function ProjetsPage() {
           {filtered.map((projet) => {
             const progress = projet.statut === 'termine' ? 100 : projet.statut === 'en_cours' ? 60 : projet.statut === 'en_preparation' ? 10 : projet.statut === 'en_pause' ? 40 : 0;
             return (
-              <div key={projet.id} className="card p-4 sm:p-5 hover:shadow-md transition-shadow">
+              <div key={projet.id} onClick={() => setEditProjet(projet)} className="card p-4 sm:p-5 hover:shadow-md hover:border-brand-200 cursor-pointer transition-all">
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-semibold text-gray-900 truncate">{projet.nom}</h3>
@@ -161,13 +199,12 @@ export default function ProjetsPage() {
                   <div className="flex items-center gap-2 shrink-0 ml-2">
                     <select
                       value={projet.statut}
-                      onChange={(e) => handleStatutChange(projet.id, e.target.value as ProjetStatut)}
-                      className="text-xs border border-gray-200 rounded-full px-2 py-1 bg-white cursor-pointer min-h-[32px]"
+                      onChange={(e) => { e.stopPropagation(); handleStatutChange(e as unknown as React.MouseEvent, projet.id, e.target.value as ProjetStatut); }}
                       onClick={(e) => e.stopPropagation()}
+                      className="text-xs border border-gray-200 rounded-full px-2 py-1 bg-white cursor-pointer min-h-[32px]"
                     >
                       {PROJET_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
                     </select>
-                    <button onClick={() => handleDelete(projet.id)} className="text-gray-400 hover:text-red-600 p-1 min-h-[32px] min-w-[32px] flex items-center justify-center text-lg">×</button>
                   </div>
                 </div>
 
@@ -190,8 +227,7 @@ export default function ProjetsPage() {
                   <div className="flex items-center gap-2 sm:gap-3 min-w-0">
                     <span className="flex items-center gap-1 shrink-0">
                       <Calendar className="w-3.5 h-3.5" />
-                      <span className="hidden sm:inline">{formatDate(projet.date_debut)}</span>
-                      <span className="sm:hidden">{formatDate(projet.date_debut)}</span>
+                      {formatDate(projet.date_debut)}
                     </span>
                     {projet.date_fin_prevue && (
                       <span className="flex items-center gap-1 shrink-0">

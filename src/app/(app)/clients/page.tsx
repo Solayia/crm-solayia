@@ -1,11 +1,13 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, Plus, TrendingUp, Building2, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Search, Plus, TrendingUp, Building2, X, ChevronRight } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import { getClients, createClientAction } from './actions';
 
 export default function ClientsPage() {
+  const router = useRouter();
   const [search, setSearch] = useState('');
   const [clients, setClients] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +142,7 @@ export default function ClientsPage() {
           {/* Mobile: card view */}
           <div className="space-y-3 md:hidden">
             {filtered.map((client) => (
-              <div key={client.id} className="card p-4">
+              <div key={client.id} onClick={() => router.push(`/clients/${client.id}`)} className="card p-4 cursor-pointer hover:border-brand-200 hover:shadow-sm transition-all active:bg-gray-50">
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
                     {getInitials(client.entreprise)}
@@ -150,16 +152,13 @@ export default function ClientsPage() {
                     <p className="text-xs text-gray-500">{client.prenom} {client.nom}</p>
                     {client.email && <p className="text-xs text-gray-400 truncate">{client.email}</p>}
                   </div>
-                  <div className="text-right shrink-0">
-                    <p className="text-sm font-semibold text-green-600">{formatCurrency(client.mrr || 0)}</p>
-                    <p className="text-[10px] text-gray-400">/mois</p>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <div className="text-right">
+                      <p className="text-sm font-semibold text-green-600">{formatCurrency(client.mrr || 0)}</p>
+                      <p className="text-[10px] text-gray-400">/mois</p>
+                    </div>
+                    <ChevronRight className="w-4 h-4 text-gray-300" />
                   </div>
-                </div>
-                <div className="flex items-center justify-between mt-3 pt-2 border-t border-gray-100">
-                  <div className="flex items-center gap-2">
-                    {client.telephone && <span className="text-xs text-gray-500">{client.telephone}</span>}
-                  </div>
-                  <span className="text-[11px] text-gray-400">Depuis {formatDate(client.created_at)}</span>
                 </div>
               </div>
             ))}
@@ -181,7 +180,7 @@ export default function ClientsPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-50">
                   {filtered.map((client) => (
-                    <tr key={client.id} className="hover:bg-gray-50 cursor-pointer transition-colors">
+                    <tr key={client.id} onClick={() => router.push(`/clients/${client.id}`)} className="hover:bg-brand-50/40 cursor-pointer transition-colors">
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-9 h-9 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center text-xs font-bold shrink-0">
