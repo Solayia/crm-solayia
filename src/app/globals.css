@@ -47,74 +47,107 @@
   background: #94a3b8;
 }
 
-/* ===== Auth pages animations ===== */
+/* ===== Auth pages — Premium animations ===== */
+
+/* Aurora gradient background */
+.aurora-bg {
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 80%, rgba(56, 189, 248, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 20%, rgba(129, 140, 248, 0.15) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 50% 50%, rgba(167, 139, 250, 0.08) 0%, transparent 70%);
+}
 
 /* Fade in */
 .animate-fade-in {
-  animation: fadeIn 0.5s ease-out both;
+  animation: fadeIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Fade in up (staggered for visual panel) */
+/* Fade in up (staggered) */
 .animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out both;
+  animation: fadeInUp 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(24px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-.animation-delay-100 { animation-delay: 0.1s; }
-.animation-delay-200 { animation-delay: 0.2s; }
-.animation-delay-300 { animation-delay: 0.35s; }
-.animation-delay-400 { animation-delay: 0.5s; }
+.animation-delay-100 { animation-delay: 0.12s; }
+.animation-delay-200 { animation-delay: 0.24s; }
+.animation-delay-300 { animation-delay: 0.38s; }
+.animation-delay-400 { animation-delay: 0.52s; }
 
 /* Shake (error) */
 .animate-shake {
-  animation: shake 0.4s ease-in-out;
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
 }
 
 @keyframes shake {
   0%, 100% { transform: translateX(0); }
-  20% { transform: translateX(-6px); }
-  40% { transform: translateX(6px); }
-  60% { transform: translateX(-4px); }
-  80% { transform: translateX(4px); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(3px); }
 }
 
-/* Floating shapes */
+/* Floating shapes (mobile header) */
 .animate-float {
-  animation: float 8s ease-in-out infinite;
+  animation: float 7s ease-in-out infinite;
 }
 .animate-float-delayed {
-  animation: float 8s ease-in-out 3s infinite;
-}
-.animate-float-slow {
-  animation: floatSlow 12s ease-in-out infinite;
+  animation: float 7s ease-in-out 2.5s infinite;
 }
 
 @keyframes float {
   0%, 100% { transform: translateY(0) scale(1); }
-  50% { transform: translateY(-20px) scale(1.05); }
+  50% { transform: translateY(-16px) scale(1.04); }
 }
 
-@keyframes floatSlow {
-  0%, 100% { transform: translateY(0) rotate(45deg) scale(1); }
-  50% { transform: translateY(-15px) rotate(50deg) scale(1.03); }
+/* Desktop: orbiting gradient blobs */
+.animate-orb-1 {
+  animation: orb1 12s ease-in-out infinite;
+}
+.animate-orb-2 {
+  animation: orb2 14s ease-in-out infinite;
+}
+.animate-orb-3 {
+  animation: orb3 10s ease-in-out infinite;
 }
 
-/* Subtle gradient animation */
-.animate-gradient {
-  background-size: 200% 200%;
-  animation: gradientShift 8s ease-in-out infinite;
+@keyframes orb1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  33% { transform: translate(40px, -30px) scale(1.1); opacity: 0.8; }
+  66% { transform: translate(-20px, 20px) scale(0.95); opacity: 0.5; }
+}
+@keyframes orb2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  33% { transform: translate(-50px, 30px) scale(1.15); opacity: 0.7; }
+  66% { transform: translate(30px, -40px) scale(0.9); opacity: 0.4; }
+}
+@keyframes orb3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.4; }
+  50% { transform: translate(20px, -20px) scale(1.2); opacity: 0.7; }
 }
 
-@keyframes gradientShift {
-  0%, 100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-in,
+  .animate-fade-in-up,
+  .animate-shake {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .animate-float,
+  .animate-float-delayed,
+  .animate-orb-1,
+  .animate-orb-2,
+  .animate-orb-3 {
+    animation: none !important;
+  }
 }
