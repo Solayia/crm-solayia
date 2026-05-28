@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import type { ProspectStatut } from '@/lib/types';
 
 export async function getClients() {
   const supabase = await createClient();
@@ -109,6 +110,40 @@ export async function deleteClientAction(id: string) {
   if (error) return { error: error.message };
 
   revalidatePath('/clients');
+  revalidatePath('/dashboard');
+  return { success: true };
+}
+
+// --- Pipeline projet (prospects passes en phase projet) ---
+
+const PROJET_STATUTS_VALUES = ['brief', 'maquette', 'validation_maquette', 'pre_prod', 'validation_pre_prod', 'production', 'suivi'];
+
+export async function getProjetProspects() {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('prospects')
+    .select('*, assigned_profile:profiles!prospects_assigned_to_fkey(id, full_name, email)')
+    .in('statut', PROJET_STATUTS_VALUES)
+    .order('updated_at', { ascending: false });
+
+  if (error) {
+    console.error('getProjetProspects error:', error);
+    return [];
+  }
+  return data ?? [];
+}
+
+export async function updateProjetProspectStatut(id: string, statut: ProspectStatut) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('prospects')
+    .update({ statut, updated_at: new Date().toISOString() })
+    .eq('id', id);
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/clients');
+  revalidatePath('/prospects');
   revalidatePath('/dashboard');
   return { success: true };
 }

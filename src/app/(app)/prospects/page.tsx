@@ -148,17 +148,9 @@ export default function ProspectsPage() {
           </div>
           <select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value as ProspectStatut | '')} className="input-field w-auto shrink-0 text-sm">
             <option value="">Toutes etapes</option>
-            <optgroup label="Pipeline commercial">
-              {PROSPECT_STATUTS.filter(s => ['prospect','prise_contact','r1','r2','proposition','acompte'].includes(s.value)).map((s) => (
-                <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>
-              ))}
-            </optgroup>
-            <optgroup label="Gestion projet">
-              {PROSPECT_STATUTS.filter(s => ['brief','maquette','validation_maquette','pre_prod','validation_pre_prod','production','suivi'].includes(s.value)).map((s) => (
-                <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>
-              ))}
-            </optgroup>
-            <option value="perdu">❌ Perdu</option>
+            {PROSPECT_STATUTS.filter(s => ['prospect','prise_contact','r1','r2','proposition','acompte','perdu'].includes(s.value)).map((s) => (
+              <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>
+            ))}
           </select>
         </div>
         <div className="flex items-center justify-between">
@@ -333,7 +325,7 @@ export default function ProspectsPage() {
                         </td>
                         <td className="px-4 py-3">
                           <select value={p.statut} onChange={(e) => { e.stopPropagation(); handleStatutChange(p.id, e.target.value as ProspectStatut); }} onClick={(e) => e.stopPropagation()} className="text-xs border border-gray-200 rounded-full px-2 py-0.5 bg-white cursor-pointer">
-                            {PROSPECT_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.emoji} {s.label}</option>))}
+                            {PROSPECT_STATUTS.filter(s => ['prospect','prise_contact','r1','r2','proposition','acompte','perdu'].includes(s.value)).map((s) => (<option key={s.value} value={s.value}>{s.emoji} {s.label}</option>))}
                           </select>
                         </td>
                         <td className="px-4 py-3"><span className="text-xs text-gray-500">{p.source || '—'}</span></td>

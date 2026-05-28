@@ -26,7 +26,7 @@ export async function POST() {
     })
     .map((p) => {
       // Retirer les champs qui ne sont pas dans la table Supabase (id, assigned_profile, etc.)
-      const { id, assigned_to, ...rest } = p as Record<string, unknown>;
+      const { id, assigned_to, ...rest } = p as unknown as Record<string, unknown>;
       return {
         ...rest,
         assigned_to: null, // On ne peut pas mapper les IDs mock vers Supabase

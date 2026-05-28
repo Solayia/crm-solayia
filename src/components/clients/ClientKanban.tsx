@@ -1,24 +1,17 @@
 'use client';
 
-import { useState } from 'react';
-import { PROSPECT_STATUTS, PIPELINE_COMMERCIAL, PROSPECT_TEMPERATURES } from '@/lib/types';
+import { PIPELINE_PROJET, PROSPECT_STATUTS } from '@/lib/types';
 import type { ProspectStatut } from '@/lib/types';
 import { getInitials } from '@/lib/utils';
-import { Phone, Mail, Flame, Snowflake, Sun } from 'lucide-react';
+import { Phone, Mail, Building2 } from 'lucide-react';
 import Link from 'next/link';
 
-interface ProspectKanbanProps {
+interface ClientKanbanProps {
   prospects: any[];
   onStatutChange: (id: string, statut: ProspectStatut) => void;
 }
 
 const columnColors: Record<string, string> = {
-  prospect: 'border-t-gray-400',
-  prise_contact: 'border-t-sky-500',
-  r1: 'border-t-blue-500',
-  r2: 'border-t-indigo-500',
-  proposition: 'border-t-violet-500',
-  acompte: 'border-t-purple-500',
   brief: 'border-t-fuchsia-500',
   maquette: 'border-t-pink-500',
   validation_maquette: 'border-t-rose-500',
@@ -26,25 +19,17 @@ const columnColors: Record<string, string> = {
   validation_pre_prod: 'border-t-orange-500',
   production: 'border-t-emerald-500',
   suivi: 'border-t-green-500',
-  perdu: 'border-t-red-500',
 };
 
-const tempIcons: Record<string, { icon: typeof Flame; color: string }> = {
-  chaud: { icon: Flame, color: 'text-red-500' },
-  tiede: { icon: Sun, color: 'text-amber-500' },
-  froid: { icon: Snowflake, color: 'text-blue-500' },
-};
+const projetStatutsOnly = PROSPECT_STATUTS.filter(s =>
+  ['brief', 'maquette', 'validation_maquette', 'pre_prod', 'validation_pre_prod', 'production', 'suivi'].includes(s.value)
+);
 
-export default function ProspectKanban({ prospects, onStatutChange }: ProspectKanbanProps) {
-  // Pipeline prospects = commercial uniquement (+ perdu)
-  const statuts = [...PIPELINE_COMMERCIAL, PROSPECT_STATUTS.find(s => s.value === 'perdu')!];
-
+export default function ClientKanban({ prospects, onStatutChange }: ClientKanbanProps) {
   return (
     <div className="space-y-3">
-
-      {/* Kanban board */}
       <div className="flex gap-3 overflow-x-auto pb-4 min-h-[500px]">
-        {statuts.map((statut) => {
+        {PIPELINE_PROJET.map((statut) => {
           const items = prospects.filter((p) => p.statut === statut.value);
           return (
             <div key={statut.value} className="flex-shrink-0 w-64">
@@ -64,8 +49,6 @@ export default function ProspectKanban({ prospects, onStatutChange }: ProspectKa
               {/* Cards */}
               <div className="space-y-2">
                 {items.map((prospect) => {
-                  const TempIcon = tempIcons[prospect.temperature]?.icon || Sun;
-                  const tempColor = tempIcons[prospect.temperature]?.color || 'text-gray-400';
                   const displayName = prospect.entreprise || `${prospect.prenom} ${prospect.nom}`.trim() || 'Sans nom';
 
                   return (
@@ -78,11 +61,18 @@ export default function ProspectKanban({ prospects, onStatutChange }: ProspectKa
                         <h4 className="text-sm font-medium text-gray-900 group-hover:text-brand-600 transition-colors leading-tight flex-1 mr-2">
                           {displayName}
                         </h4>
-                        <TempIcon className={`w-4 h-4 shrink-0 ${tempColor}`} />
+                        <div className="w-6 h-6 rounded-lg bg-brand-50 text-brand-700 flex items-center justify-center text-[10px] font-bold shrink-0">
+                          {getInitials(displayName)}
+                        </div>
                       </div>
                       {prospect.entreprise && (prospect.prenom || prospect.nom) && (
                         <p className="text-xs text-gray-500 mb-1.5">
                           {prospect.prenom} {prospect.nom}
+                        </p>
+                      )}
+                      {prospect.type_prestation && (
+                        <p className="text-[10px] text-brand-600 bg-brand-50 rounded-full px-2 py-0.5 inline-block mb-1.5">
+                          {prospect.type_prestation}
                         </p>
                       )}
                       <div className="flex items-center gap-2 text-xs text-gray-400 mb-2">
@@ -96,9 +86,9 @@ export default function ProspectKanban({ prospects, onStatutChange }: ProspectKa
                             <Mail className="w-3 h-3" />
                           </span>
                         )}
-                        {prospect.source && (
-                          <span className="ml-auto text-[10px] px-1.5 py-0.5 bg-gray-50 rounded text-gray-500 truncate max-w-[100px]">
-                            {prospect.source}
+                        {prospect.tarif_propose && (
+                          <span className="ml-auto text-[10px] font-semibold text-green-600">
+                            {new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(prospect.tarif_propose)}
                           </span>
                         )}
                       </div>
@@ -109,7 +99,7 @@ export default function ProspectKanban({ prospects, onStatutChange }: ProspectKa
                           onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
                           className="text-[11px] border border-gray-200 rounded-full px-2 py-0.5 bg-white cursor-pointer max-w-[130px]"
                         >
-                          {PROSPECT_STATUTS.filter(s => ['prospect','prise_contact','r1','r2','proposition','acompte','perdu'].includes(s.value)).map((s) => (
+                          {projetStatutsOnly.map((s) => (
                             <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>
                           ))}
                         </select>
@@ -127,7 +117,7 @@ export default function ProspectKanban({ prospects, onStatutChange }: ProspectKa
                 })}
                 {items.length === 0 && (
                   <div className="text-center py-6 text-[11px] text-gray-400">
-                    Aucun prospect
+                    Aucun projet
                   </div>
                 )}
               </div>
