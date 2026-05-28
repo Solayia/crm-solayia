@@ -40,6 +40,11 @@ export async function createProspect(formData: FormData) {
     temperature: formData.get('temperature') as string || 'froid',
     type_contact: formData.get('type_contact') as string || 'prospect',
     produit_cible: formData.get('produit_cible') as string || 'Solayia',
+    activite: (formData.get('activite') as string) || null,
+    adresse: (formData.get('adresse') as string) || null,
+    canaux_privilegies: (formData.get('canaux_privilegies') as string) || null,
+    site_web: (formData.get('site_web') as string) || null,
+    fonction: (formData.get('fonction') as string) || null,
   });
 
   if (error) {
@@ -115,10 +120,27 @@ export async function updateProspect(id: string, formData: FormData) {
     urgence: (formData.get('urgence') as string) || 'normale',
     date_relance: (formData.get('date_relance') as string) || null,
     date_premier_contact: (formData.get('date_premier_contact') as string) || null,
+    // Champs enrichis CRM
+    activite: (formData.get('activite') as string) || null,
+    adresse: (formData.get('adresse') as string) || null,
+    canaux_privilegies: (formData.get('canaux_privilegies') as string) || null,
+    dernier_canal: (formData.get('dernier_canal') as string) || null,
+    derniere_communication: (formData.get('derniere_communication') as string) || null,
+    drive_dedie: (formData.get('drive_dedie') as string) || null,
+    fichiers_medias: (formData.get('fichiers_medias') as string) || null,
+    fonction: (formData.get('fonction') as string) || null,
+    maquette_solayia: (formData.get('maquette_solayia') as string) || null,
+    pappers: (formData.get('pappers') as string) || null,
+    prescripteur_ref: (formData.get('prescripteur_ref') as string) || null,
+    site_web: (formData.get('site_web') as string) || null,
+    traits_personnalite: (formData.get('traits_personnalite') as string) || null,
   };
 
   const tarif = formData.get('tarif_propose') as string;
   updates.tarif_propose = tarif ? parseFloat(tarif) : null;
+
+  const ca = formData.get('ca_en_k') as string;
+  updates.ca_en_k = ca ? parseFloat(ca) : null;
 
   const { error } = await supabase
     .from('prospects')

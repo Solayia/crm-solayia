@@ -6,7 +6,8 @@ import {
   ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, MapPin,
   User, Calendar, Clock, X, Plus, MessageSquare, PhoneCall, MailIcon,
   MessageCircle, Bell, AlertTriangle, Briefcase, FileText, ChevronDown,
-  Flame, Snowflake, Sun, Users,
+  Flame, Snowflake, Sun, Users, Globe, ExternalLink, FolderOpen, Palette,
+  Heart, Link2, Activity,
 } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import {
@@ -74,6 +75,22 @@ export default function ProspectDetailPage() {
   const [datePremierContact, setDatePremierContact] = useState('');
   const [dateRelance, setDateRelance] = useState('');
 
+  // Form fields — Enrichis CRM
+  const [activite, setActivite] = useState('');
+  const [adresse, setAdresse] = useState('');
+  const [caEnK, setCaEnK] = useState('');
+  const [canauxPrivilegies, setCanauxPrivilegies] = useState('');
+  const [dernierCanal, setDernierCanal] = useState('');
+  const [derniereCommunication, setDerniereCommunication] = useState('');
+  const [driveDedie, setDriveDedie] = useState('');
+  const [fichiersMedias, setFichiersMedias] = useState('');
+  const [fonction, setFonction] = useState('');
+  const [maquetteSolayia, setMaquetteSolayia] = useState('');
+  const [pappers, setPappers] = useState('');
+  const [prescripteurRef, setPrescripteurRef] = useState('');
+  const [siteWeb, setSiteWeb] = useState('');
+  const [traitsPersonnalite, setTraitsPersonnalite] = useState('');
+
   const loadData = useCallback(async () => {
     const [p, pr, inter, dev] = await Promise.all([
       getProspect(prospectId),
@@ -102,6 +119,21 @@ export default function ProspectDetailPage() {
       setUrgence(p.urgence || 'normale');
       setDatePremierContact(p.date_premier_contact || '');
       setDateRelance(p.date_relance || '');
+      // Enrichis CRM
+      setActivite(p.activite || '');
+      setAdresse(p.adresse || '');
+      setCaEnK(p.ca_en_k ? String(p.ca_en_k) : '');
+      setCanauxPrivilegies(p.canaux_privilegies || '');
+      setDernierCanal(p.dernier_canal || '');
+      setDerniereCommunication(p.derniere_communication || '');
+      setDriveDedie(p.drive_dedie || '');
+      setFichiersMedias(p.fichiers_medias || '');
+      setFonction(p.fonction || '');
+      setMaquetteSolayia(p.maquette_solayia || '');
+      setPappers(p.pappers || '');
+      setPrescripteurRef(p.prescripteur_ref || '');
+      setSiteWeb(p.site_web || '');
+      setTraitsPersonnalite(p.traits_personnalite || '');
     }
     setProfiles(pr);
     setInteractions(inter);
@@ -133,6 +165,21 @@ export default function ProspectDetailPage() {
     formData.set('urgence', urgence);
     formData.set('date_premier_contact', datePremierContact);
     formData.set('date_relance', dateRelance);
+    // Champs enrichis CRM
+    formData.set('activite', activite);
+    formData.set('adresse', adresse);
+    formData.set('ca_en_k', caEnK);
+    formData.set('canaux_privilegies', canauxPrivilegies);
+    formData.set('dernier_canal', dernierCanal);
+    formData.set('derniere_communication', derniereCommunication);
+    formData.set('drive_dedie', driveDedie);
+    formData.set('fichiers_medias', fichiersMedias);
+    formData.set('fonction', fonction);
+    formData.set('maquette_solayia', maquetteSolayia);
+    formData.set('pappers', pappers);
+    formData.set('prescripteur_ref', prescripteurRef);
+    formData.set('site_web', siteWeb);
+    formData.set('traits_personnalite', traitsPersonnalite);
 
     const result = await updateProspect(prospectId, formData);
     setSaving(false);
@@ -404,6 +451,94 @@ export default function ProspectDetailPage() {
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Notes internes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-field" placeholder="Notes libres, remarques..." />
+          </div>
+        </div>
+      </div>
+
+      {/* Section 1b : Fiche CRM enrichie */}
+      <div className={`card p-5 sm:p-6 ${activeSection !== 'info' ? 'hidden sm:block' : ''}`}>
+        <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Activity className="w-4 h-4 text-brand-600" />
+          Fiche CRM enrichie
+        </h2>
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Activite / Metier</label>
+              <input value={activite} onChange={(e) => setActivite(e.target.value)} className="input-field" placeholder="Ex: Climatisation, Boulangerie..." />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Fonction / Poste</label>
+              <input value={fonction} onChange={(e) => setFonction(e.target.value)} className="input-field" placeholder="Ex: Dirigeant, DG, Fondateur..." />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><MapPin className="w-3 h-3" /> Adresse</label>
+              <input value={adresse} onChange={(e) => setAdresse(e.target.value)} className="input-field" placeholder="Adresse du prospect" />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Euro className="w-3 h-3" /> CA (en K€)</label>
+              <input type="number" value={caEnK} onChange={(e) => setCaEnK(e.target.value)} className="input-field" placeholder="Ex: 400" />
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Canaux privilegies</label>
+              <input value={canauxPrivilegies} onChange={(e) => setCanauxPrivilegies(e.target.value)} className="input-field" placeholder="Email, SMS, Physique, Visio..." />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Dernier canal / Date</label>
+              <div className="flex gap-2">
+                <input value={dernierCanal} onChange={(e) => setDernierCanal(e.target.value)} className="input-field flex-1" placeholder="Email, SMS..." />
+                <input value={derniereCommunication} onChange={(e) => setDerniereCommunication(e.target.value)} className="input-field flex-1" placeholder="20 mai 2026" />
+              </div>
+            </div>
+          </div>
+          {/* Liens externes */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Globe className="w-3 h-3" /> Site web</label>
+              <div className="flex gap-1">
+                <input value={siteWeb} onChange={(e) => setSiteWeb(e.target.value)} className="input-field flex-1" placeholder="https://..." />
+                {siteWeb && <a href={siteWeb} target="_blank" rel="noopener noreferrer" className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg shrink-0"><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Palette className="w-3 h-3" /> Maquette Solayia</label>
+              <div className="flex gap-1">
+                <input value={maquetteSolayia} onChange={(e) => setMaquetteSolayia(e.target.value)} className="input-field flex-1" placeholder="https://solayia.github.io/..." />
+                {maquetteSolayia && <a href={maquetteSolayia} target="_blank" rel="noopener noreferrer" className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg shrink-0"><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Link2 className="w-3 h-3" /> Pappers</label>
+              <div className="flex gap-1">
+                <input value={pappers} onChange={(e) => setPappers(e.target.value)} className="input-field flex-1" placeholder="https://www.pappers.fr/..." />
+                {pappers && <a href={pappers} target="_blank" rel="noopener noreferrer" className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg shrink-0"><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><FolderOpen className="w-3 h-3" /> Drive dedie</label>
+              <div className="flex gap-1">
+                <input value={driveDedie} onChange={(e) => setDriveDedie(e.target.value)} className="input-field flex-1" placeholder="https://drive.google.com/..." />
+                {driveDedie && <a href={driveDedie} target="_blank" rel="noopener noreferrer" className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg shrink-0"><ExternalLink className="w-4 h-4" /></a>}
+              </div>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Prescripteur(s) referent(s)</label>
+            <input value={prescripteurRef} onChange={(e) => setPrescripteurRef(e.target.value)} className="input-field" placeholder="Nom du prescripteur" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Heart className="w-3 h-3" /> Traits de personnalite</label>
+            <textarea value={traitsPersonnalite} onChange={(e) => setTraitsPersonnalite(e.target.value)} rows={2} className="input-field" placeholder="Douce, exigeante, sympathique..." />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Fichiers & Medias</label>
+            <input value={fichiersMedias} onChange={(e) => setFichiersMedias(e.target.value)} className="input-field" placeholder="Liens vers fichiers, presentations..." />
           </div>
         </div>
       </div>

@@ -119,16 +119,30 @@ export const TYPES_PRESTATION = [
 ];
 
 export const SOURCES_PROSPECT = [
+  'BNI',
+  'Corporate Connections',
+  'Recommandation',
+  'Réseau',
+  'Cold call',
+  'Spontanée',
   'Site web',
   'Google Ads',
   'Bouche a oreille',
-  'Recommandation',
   'Salon professionnel',
   'Reseaux sociaux',
-  'Corporate Connections',
   'Prospection terrain',
   'Demarchage telephone',
   'Autre',
+];
+
+export const CANAUX_COMMUNICATION = [
+  'Email',
+  'SMS',
+  'Physique',
+  'Téléphone',
+  'Visio',
+  'Whatsapp',
+  'Linkedin',
 ];
 
 export interface Prospect {
@@ -155,6 +169,21 @@ export interface Prospect {
   urgence: ProspectUrgence;
   created_at: string;
   updated_at: string;
+  // --- Champs enrichis CRM ---
+  activite: string | null;
+  adresse: string | null;
+  ca_en_k: number | null;
+  canaux_privilegies: string | null;
+  dernier_canal: string | null;
+  derniere_communication: string | null;
+  drive_dedie: string | null;
+  fichiers_medias: string | null;
+  fonction: string | null;
+  maquette_solayia: string | null;
+  pappers: string | null;
+  prescripteur_ref: string | null;
+  site_web: string | null;
+  traits_personnalite: string | null;
 }
 
 export interface Client {
