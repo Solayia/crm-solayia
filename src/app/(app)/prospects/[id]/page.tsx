@@ -22,6 +22,8 @@ import {
   getProspectDevis,
 } from '../actions';
 import ProspectCommunications from '@/components/prospects/ProspectCommunications';
+import ProspectToolbox from '@/components/prospects/ProspectToolbox';
+import ProposalEditor from '@/components/prospects/ProposalEditor';
 
 const INTERACTION_TYPES = [
   { value: 'appel', label: 'Appel', icon: PhoneCall, color: 'text-green-600 bg-green-50' },
@@ -51,6 +53,7 @@ export default function ProspectDetailPage() {
   const [showInteractionForm, setShowInteractionForm] = useState(false);
   const [interactionLoading, setInteractionLoading] = useState(false);
   const [activeSection, setActiveSection] = useState<'info' | 'prestation' | 'historique'>('info');
+  const [showProposalEditor, setShowProposalEditor] = useState(false);
 
   // Form fields — Infos contact
   const [nom, setNom] = useState('');
@@ -279,6 +282,10 @@ export default function ProspectDetailPage() {
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          <button onClick={() => setShowProposalEditor(true)} className="btn-secondary text-xs sm:text-sm" title="Creer une proposition">
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Proposition</span>
+          </button>
           <button onClick={handleDelete} className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg" title="Supprimer">
             <Trash2 className="w-5 h-5" />
           </button>
@@ -310,15 +317,21 @@ export default function ProspectDetailPage() {
         </div>
       )}
 
-      {/* Communications automatiques — visible uniquement en Prise de contact */}
-      {statut === 'prise_contact' && (
-        <ProspectCommunications prospect={{
-          nom, prenom, entreprise, email, telephone,
-          temperature, source,
-          type_prestation: typePrestation || null,
-          produit_cible: produitCible,
-          notes: notes || null,
-        }} />
+      {/* Communications automatiques — visible a toutes les etapes */}
+      {statut !== 'perdu' && (
+        <ProspectCommunications
+          prospect={{
+            nom, prenom, entreprise, email, telephone,
+            temperature, source,
+            type_prestation: typePrestation || null,
+            produit_cible: produitCible,
+            notes: notes || null,
+            description_prestation: descriptionPrestation || null,
+            tarif_propose: tarifPropose ? parseFloat(tarifPropose) : null,
+            adresse_chantier: adresseChantier || null,
+          }}
+          statut={statut}
+        />
       )}
 
       {/* Alerte relance */}
@@ -683,6 +696,24 @@ export default function ProspectDetailPage() {
         </div>
       )}
 
+      {/* Section 5 : Toolbox — Scoring, Checklist, Relance, Conversion */}
+      <ProspectToolbox
+        prospect={{
+          ...prospect,
+          statut,
+          temperature,
+          email,
+          telephone,
+          type_prestation: typePrestation || null,
+          tarif_propose: tarifPropose ? parseFloat(tarifPropose) : null,
+          prospect_checklist: prospect.prospect_checklist || null,
+          motif_perte: prospect.motif_perte || null,
+          date_premier_contact: datePremierContact || null,
+        }}
+        interactions={interactions}
+        onUpdate={loadData}
+      />
+
       {/* Meta */}
       <p className="text-xs text-gray-400 text-center pb-4">
         Cree le {formatDate(prospect.created_at)}
@@ -690,6 +721,21 @@ export default function ProspectDetailPage() {
           <> · Modifie le {formatDate(prospect.updated_at)}</>
         )}
       </p>
+
+      {/* Editeur proposition A4 */}
+      {showProposalEditor && (
+        <ProposalEditor
+          prospectData={{
+            nom, prenom, entreprise, email, telephone,
+            adresse: adresse || undefined,
+            type_prestation: typePrestation || undefined,
+            description_prestation: descriptionPrestation || undefined,
+            tarif_propose: tarifPropose ? parseFloat(tarifPropose) : undefined,
+            adresse_chantier: adresseChantier || undefined,
+          }}
+          onClose={() => setShowProposalEditor(false)}
+        />
+      )}
 
       {/* Modal ajout interaction */}
       {showInteractionForm && (

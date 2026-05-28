@@ -54,6 +54,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p2',
@@ -92,6 +94,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://www.loveandvibes.fr/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p3',
@@ -130,6 +134,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p4',
@@ -168,6 +174,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p5',
@@ -206,6 +214,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: 'Couleur préféré : vert\nDouce, exigeante, lente',
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p6',
@@ -244,6 +254,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p7',
@@ -282,6 +294,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p8',
@@ -319,7 +333,9 @@ export const mockProspects: Prospect[] = [
     pappers: null,
     prescripteur_ref: null,
     site_web: null,
-    traits_personnalite: 'Douce, carré, à l’écoute, besoin de dev son business',
+    traits_personnalite: "Douce, carré, à l’écoute, besoin de dev son business",
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p9',
@@ -358,6 +374,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p10',
@@ -396,6 +414,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p11',
@@ -434,6 +454,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p12',
@@ -472,6 +494,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p13',
@@ -510,6 +534,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p14',
@@ -548,6 +574,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p15',
@@ -586,6 +614,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://ytaing-fast-food.eatbu.com/?lang=fr#contact',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p16',
@@ -624,6 +654,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://www.instagram.com/lepanivore/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p17',
@@ -662,6 +694,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p18',
@@ -700,6 +734,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p19',
@@ -738,6 +774,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p20',
@@ -776,6 +814,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p21',
@@ -814,6 +854,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p22',
@@ -852,6 +894,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p23',
@@ -890,6 +934,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://mayumi-toulouse.tiiny.site/jpg/MAYUMI-MENU-VITRINE_page-0002',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p24',
@@ -928,6 +974,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p25',
@@ -966,6 +1014,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p26',
@@ -1004,6 +1054,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p27',
@@ -1042,6 +1094,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p28',
@@ -1080,6 +1134,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p29',
@@ -1118,6 +1174,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p30',
@@ -1156,6 +1214,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p31',
@@ -1194,6 +1254,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p32',
@@ -1232,6 +1294,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p33',
@@ -1270,6 +1334,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: 'Sympathique, sud ouest, gaillard (fête de condom)',
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p34',
@@ -1308,6 +1374,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://www.stylobat-peinture.fr/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p35',
@@ -1346,6 +1414,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://www.alarian-solutions.fr/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p36',
@@ -1384,6 +1454,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p37',
@@ -1422,6 +1494,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://www.canalisateurs.com/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p38',
@@ -1460,6 +1534,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://batifranceconstruction.com/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p39',
@@ -1498,6 +1574,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p40',
@@ -1536,6 +1614,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://somafi-group.fr/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p41',
@@ -1574,6 +1654,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: 'https://www.les-compagnons-midipyrenees.fr/',
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p42',
@@ -1612,6 +1694,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p43',
@@ -1650,6 +1734,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
   {
     id: 'p44',
@@ -1688,6 +1774,8 @@ export const mockProspects: Prospect[] = [
     prescripteur_ref: null,
     site_web: null,
     traits_personnalite: null,
+    prospect_checklist: null,
+    motif_perte: null,
   },
 ];
 

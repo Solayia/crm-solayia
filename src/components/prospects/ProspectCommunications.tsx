@@ -1,8 +1,14 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Mail, FileImage, Monitor, X, Copy, ExternalLink, Check, Send } from 'lucide-react';
-import { generateEmailTexte, generateEmailFlyer, generateEmailMaquette } from '@/lib/email-templates';
+import {
+  Mail, FileImage, Monitor, X, Copy, ExternalLink, Check, Send,
+  RotateCcw, FileText, Heart, ChevronDown, ChevronUp,
+} from 'lucide-react';
+import {
+  generateEmailTexte, generateEmailFlyer, generateEmailMaquette,
+  generateEmailRelance, generateEmailProposition, generateEmailRemerciement,
+} from '@/lib/email-templates';
 
 interface ProspectData {
   nom: string;
@@ -15,17 +21,22 @@ interface ProspectData {
   type_prestation: string | null;
   produit_cible: string;
   notes: string | null;
+  description_prestation?: string | null;
+  tarif_propose?: number | null;
+  adresse_chantier?: string | null;
 }
 
-type ModalType = 'texte' | 'flyer' | 'maquette' | null;
+type ModalType = 'texte' | 'flyer' | 'maquette' | 'relance' | 'proposition' | 'remerciement' | null;
 
 interface ProspectCommunicationsProps {
   prospect: ProspectData;
+  statut?: string;
 }
 
-export default function ProspectCommunications({ prospect }: ProspectCommunicationsProps) {
+export default function ProspectCommunications({ prospect, statut }: ProspectCommunicationsProps) {
   const [activeModal, setActiveModal] = useState<ModalType>(null);
   const [copied, setCopied] = useState(false);
+  const [showAll, setShowAll] = useState(false);
   const previewRef = useRef<HTMLDivElement>(null);
 
   const handleCopy = async (text: string) => {
@@ -34,7 +45,6 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback
       const textarea = document.createElement('textarea');
       textarea.value = text;
       document.body.appendChild(textarea);
@@ -70,12 +80,13 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
     window.open(mailto, '_blank');
   };
 
-  const cards = [
+  // All 6 email types organized by category
+  const prospectionCards = [
     {
       type: 'texte' as ModalType,
       icon: Mail,
       title: 'Email de prospection',
-      description: 'Email texte personnalise adapte au secteur du prospect',
+      description: 'Email texte personnalise adapte au secteur',
       color: 'bg-blue-50 text-blue-600 border-blue-200',
       hoverColor: 'hover:border-blue-400 hover:shadow-blue-100',
     },
@@ -83,7 +94,7 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
       type: 'flyer' as ModalType,
       icon: FileImage,
       title: 'Email + Flyer',
-      description: 'Email avec un flyer visuel Solayia personnalise',
+      description: 'Email avec flyer visuel personnalise',
       color: 'bg-amber-50 text-amber-600 border-amber-200',
       hoverColor: 'hover:border-amber-400 hover:shadow-amber-100',
     },
@@ -91,18 +102,67 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
       type: 'maquette' as ModalType,
       icon: Monitor,
       title: 'Email + Pre-maquette',
-      description: 'Email avec un apercu de site web personnalise',
+      description: 'Apercu de site web personnalise',
       color: 'bg-purple-50 text-purple-600 border-purple-200',
       hoverColor: 'hover:border-purple-400 hover:shadow-purple-100',
     },
   ];
 
-  // Generate content based on modal type
+  const suiviCards = [
+    {
+      type: 'relance' as ModalType,
+      icon: RotateCcw,
+      title: 'Email de relance',
+      description: 'Suivi apres premier contact',
+      color: 'bg-orange-50 text-orange-600 border-orange-200',
+      hoverColor: 'hover:border-orange-400 hover:shadow-orange-100',
+    },
+    {
+      type: 'proposition' as ModalType,
+      icon: FileText,
+      title: 'Email proposition',
+      description: 'Envoi de proposition commerciale',
+      color: 'bg-emerald-50 text-emerald-600 border-emerald-200',
+      hoverColor: 'hover:border-emerald-400 hover:shadow-emerald-100',
+    },
+    {
+      type: 'remerciement' as ModalType,
+      icon: Heart,
+      title: 'Email remerciement',
+      description: 'Merci post-rendez-vous',
+      color: 'bg-pink-50 text-pink-600 border-pink-200',
+      hoverColor: 'hover:border-pink-400 hover:shadow-pink-100',
+    },
+  ];
+
+  // Smart suggestion: highlight the most relevant email based on status
+  const getSuggestedType = (): ModalType => {
+    switch (statut) {
+      case 'prospect': return 'texte';
+      case 'prise_contact': return 'texte';
+      case 'r1': return 'remerciement';
+      case 'r2': return 'remerciement';
+      case 'proposition': return 'proposition';
+      default: return 'relance';
+    }
+  };
+
+  const suggestedType = getSuggestedType();
+
   const getContent = () => {
+    const extendedProspect = {
+      ...prospect,
+      description_prestation: prospect.description_prestation || null,
+      tarif_propose: prospect.tarif_propose || null,
+      adresse_chantier: prospect.adresse_chantier || null,
+    };
     switch (activeModal) {
       case 'texte': return generateEmailTexte(prospect);
       case 'flyer': return generateEmailFlyer(prospect);
       case 'maquette': return generateEmailMaquette(prospect);
+      case 'relance': return generateEmailRelance(prospect);
+      case 'proposition': return generateEmailProposition(extendedProspect);
+      case 'remerciement': return generateEmailRemerciement(prospect);
       default: return null;
     }
   };
@@ -111,31 +171,91 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
 
   return (
     <>
-      {/* 3 cartes d'action */}
       <div className="card p-5 sm:p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
             <Send className="w-4 h-4 text-brand-600" />
             Communications automatiques
           </h2>
-          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-sky-100 text-sky-700">
-            Prise de contact
-          </span>
+          {!showAll && (
+            <button
+              onClick={() => setShowAll(true)}
+              className="text-[11px] font-medium text-brand-600 hover:text-brand-700 flex items-center gap-1"
+            >
+              Voir tous les modeles
+              <ChevronDown className="w-3 h-3" />
+            </button>
+          )}
+          {showAll && (
+            <button
+              onClick={() => setShowAll(false)}
+              className="text-[11px] font-medium text-gray-500 hover:text-gray-700 flex items-center gap-1"
+            >
+              Reduire
+              <ChevronUp className="w-3 h-3" />
+            </button>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {cards.map((card) => (
-            <button
-              key={card.type}
-              onClick={() => { setCopied(false); setActiveModal(card.type); }}
-              className={`text-left p-4 rounded-xl border-2 transition-all duration-200 ${card.color} ${card.hoverColor} hover:shadow-md group`}
-            >
-              <card.icon className="w-6 h-6 mb-2 transition-transform group-hover:scale-110" />
-              <h3 className="text-sm font-semibold mb-1">{card.title}</h3>
-              <p className="text-[11px] opacity-75 leading-relaxed">{card.description}</p>
-            </button>
-          ))}
+        {/* Prospection emails */}
+        <div className="mb-3">
+          <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Prospection</p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {prospectionCards.map((card) => (
+              <button
+                key={card.type}
+                onClick={() => { setCopied(false); setActiveModal(card.type); }}
+                className={`text-left p-4 rounded-xl border-2 transition-all duration-200 ${card.color} ${card.hoverColor} hover:shadow-md group relative`}
+              >
+                {card.type === suggestedType && (
+                  <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand-600 text-white">Suggere</span>
+                )}
+                <card.icon className="w-6 h-6 mb-2 transition-transform group-hover:scale-110" />
+                <h3 className="text-sm font-semibold mb-1">{card.title}</h3>
+                <p className="text-[11px] opacity-75 leading-relaxed">{card.description}</p>
+              </button>
+            ))}
+          </div>
         </div>
+
+        {/* Suivi emails - always visible or on toggle */}
+        {showAll && (
+          <div>
+            <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-2">Suivi & Conversion</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {suiviCards.map((card) => (
+                <button
+                  key={card.type}
+                  onClick={() => { setCopied(false); setActiveModal(card.type); }}
+                  className={`text-left p-4 rounded-xl border-2 transition-all duration-200 ${card.color} ${card.hoverColor} hover:shadow-md group relative`}
+                >
+                  {card.type === suggestedType && (
+                    <span className="absolute -top-1.5 -right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-brand-600 text-white">Suggere</span>
+                  )}
+                  <card.icon className="w-6 h-6 mb-2 transition-transform group-hover:scale-110" />
+                  <h3 className="text-sm font-semibold mb-1">{card.title}</h3>
+                  <p className="text-[11px] opacity-75 leading-relaxed">{card.description}</p>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Quick access to suivi when collapsed */}
+        {!showAll && (
+          <div className="flex items-center gap-2 mt-1">
+            {suiviCards.map((card) => (
+              <button
+                key={card.type}
+                onClick={() => { setCopied(false); setActiveModal(card.type); }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium transition-all ${card.color} hover:shadow-sm`}
+              >
+                <card.icon className="w-3.5 h-3.5" />
+                {card.title.replace('Email ', '')}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Modal de preview */}
@@ -149,6 +269,9 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
                   {activeModal === 'texte' && '📧 Email de prospection'}
                   {activeModal === 'flyer' && '🎨 Email + Flyer personnalise'}
                   {activeModal === 'maquette' && '🖥️ Email + Pre-maquette site'}
+                  {activeModal === 'relance' && '🔄 Email de relance'}
+                  {activeModal === 'proposition' && '📄 Email proposition commerciale'}
+                  {activeModal === 'remerciement' && '💝 Email de remerciement'}
                 </h3>
                 <p className="text-xs text-gray-500 mt-0.5">
                   Pour : {prospect.entreprise || `${prospect.prenom} ${prospect.nom}`.trim() || 'Prospect'}
@@ -198,9 +321,7 @@ export default function ProspectCommunications({ prospect }: ProspectCommunicati
                 {/* Copier le texte */}
                 <button
                   onClick={() => {
-                    const textToCopy = activeModal === 'texte'
-                      ? `Objet: ${content.subject}\n\n${content.body}`
-                      : content.body;
+                    const textToCopy = `Objet: ${content.subject}\n\n${content.body}`;
                     handleCopy(textToCopy);
                   }}
                   className="btn-secondary flex-1 justify-center"

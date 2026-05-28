@@ -6,6 +6,7 @@ import KpiCard from '@/components/dashboard/KpiCard';
 import MrrChart from '@/components/dashboard/MrrChart';
 import PipelineOverview from '@/components/dashboard/PipelineOverview';
 import RecentActivity from '@/components/dashboard/RecentActivity';
+import FunnelConversion from '@/components/dashboard/FunnelConversion';
 import { formatCurrency } from '@/lib/utils';
 import { getDashboardData } from './actions';
 
@@ -70,8 +71,11 @@ export default function DashboardPage() {
         <PipelineOverview prospects={prospects} />
       </div>
 
-      {/* Activity */}
-      <RecentActivity interactions={interactions} />
+      {/* Funnel + Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <FunnelConversion prospects={prospects} />
+        <RecentActivity interactions={interactions} />
+      </div>
     </div>
   );
 }

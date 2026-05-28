@@ -6,7 +6,7 @@ export async function getDashboardData() {
   const supabase = await createClient();
 
   const [prospectsRes, clientsRes, devisRes, interactionsRes, settingsRes] = await Promise.all([
-    supabase.from('prospects').select('id, statut, created_at'),
+    supabase.from('prospects').select('id, statut, motif_perte, created_at'),
     supabase.from('clients').select('id, mrr, created_at'),
     supabase.from('devis').select('id, montant_ht, montant_ttc, statut, created_at'),
     supabase.from('interactions').select('id, prospect_id, type, contenu, date_interaction, created_by, prospects(entreprise), profiles:created_by(full_name)').order('date_interaction', { ascending: false }).limit(8),
