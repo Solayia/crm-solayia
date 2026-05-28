@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Mail, Lock, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import Link from 'next/link';
 import { loginAction } from './actions';
 
 export default function LoginPage() {
@@ -88,6 +89,12 @@ export default function LoginPage() {
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
+            </div>
+
+            <div className="flex justify-end">
+              <Link href="/forgot" className="text-xs text-brand-600 hover:text-brand-700 font-medium transition-colors">
+                Mot de passe oublie ?
+              </Link>
             </div>
 
             <button type="submit" disabled={loading} className="btn-primary w-full mt-2">
