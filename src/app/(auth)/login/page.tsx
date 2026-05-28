@@ -25,18 +25,44 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
-      {/* Left: Form */}
-      <div className="flex-1 flex items-center justify-center px-5 sm:px-8 py-8 sm:py-12 relative">
-        {/* Subtle background pattern */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
+    <div className="min-h-screen lg:flex bg-gray-50">
+
+      {/* ============ MOBILE: Branded header ============ */}
+      <div className="lg:hidden bg-gradient-to-br from-brand-600 via-brand-700 to-brand-800 px-6 pt-12 pb-8 relative overflow-hidden">
+        {/* Decorative circles */}
+        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl" />
+        <div className="absolute bottom-0 -left-8 w-32 h-32 bg-brand-400/10 rounded-full blur-xl" />
+
+        <div className="relative z-10">
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-9 h-9 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center">
+              <span className="text-white font-bold text-base">S</span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-extrabold text-white tracking-tight">SOLAYIA</span>
+              <span className="text-brand-200 text-[10px] font-bold uppercase tracking-widest">CRM</span>
+            </div>
+          </div>
+          <h1 className="text-xl font-bold text-white leading-snug">
+            Bon retour parmi nous
+          </h1>
+          <p className="text-brand-200 text-sm mt-1">
+            Connectez-vous a votre espace
+          </p>
+        </div>
+      </div>
+
+      {/* ============ FORM SECTION ============ */}
+      <div className="flex-1 flex items-start lg:items-center justify-center px-5 sm:px-8 py-6 sm:py-8 lg:py-12 relative">
+        {/* Desktop: subtle dot pattern */}
+        <div className="hidden lg:block absolute inset-0 opacity-[0.03]" style={{
           backgroundImage: 'radial-gradient(circle at 1px 1px, rgb(37 99 235) 1px, transparent 0)',
           backgroundSize: '24px 24px'
         }} />
 
         <div className="w-full max-w-[400px] relative z-10 animate-fade-in">
-          {/* Logo */}
-          <div className="mb-8 sm:mb-10">
+          {/* Desktop-only logo block */}
+          <div className="hidden lg:block mb-10">
             <div className="flex items-center gap-3 mb-8">
               <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 flex items-center justify-center shadow-lg shadow-brand-500/25">
                 <span className="text-white font-bold text-xl">S</span>
@@ -46,7 +72,7 @@ export default function LoginPage() {
                 <span className="text-brand-600 text-xs font-bold uppercase tracking-widest">CRM</span>
               </div>
             </div>
-            <h1 className="text-2xl sm:text-[28px] font-bold text-gray-900 leading-tight">
+            <h1 className="text-[28px] font-bold text-gray-900 leading-tight">
               Bon retour parmi nous
             </h1>
             <p className="text-gray-500 mt-2 text-[15px]">
@@ -65,7 +91,7 @@ export default function LoginPage() {
           )}
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
             <div className="space-y-1.5">
               <label className="block text-sm font-semibold text-gray-700">Adresse email</label>
               <div className="relative group">
@@ -74,7 +100,7 @@ export default function LoginPage() {
                   type="email"
                   name="email"
                   required
-                  className="w-full pl-11 pr-4 py-3 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300"
+                  className="w-full pl-11 pr-4 py-3 text-base sm:text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300"
                   placeholder="votre@email.fr"
                   autoComplete="email"
                 />
@@ -89,16 +115,16 @@ export default function LoginPage() {
                   type={showPassword ? 'text' : 'password'}
                   name="password"
                   required
-                  className="w-full pl-11 pr-12 py-3 text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300"
+                  className="w-full pl-11 pr-12 py-3 text-base sm:text-sm border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-brand-500/20 focus:border-brand-500 outline-none transition-all placeholder:text-gray-400 hover:border-gray-300"
                   placeholder="••••••••"
                   autoComplete="current-password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1 rounded-md hover:bg-gray-100 transition-all"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1.5 rounded-lg hover:bg-gray-100 transition-all"
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  {showPassword ? <EyeOff className="w-[18px] h-[18px]" /> : <Eye className="w-[18px] h-[18px]" />}
                 </button>
               </div>
             </div>
@@ -109,7 +135,7 @@ export default function LoginPage() {
               </Link>
             </div>
 
-            <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/25 hover:shadow-brand-700/30 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] duration-200">
+            <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2.5 px-4 py-3.5 bg-gradient-to-r from-brand-600 to-brand-700 hover:from-brand-700 hover:to-brand-800 text-white text-[15px] sm:text-sm font-semibold rounded-xl transition-all shadow-lg shadow-brand-600/25 hover:shadow-brand-700/30 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] duration-200">
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
@@ -121,24 +147,44 @@ export default function LoginPage() {
             </button>
           </form>
 
+          {/* Mobile: feature pills */}
+          <div className="lg:hidden mt-6 flex flex-wrap gap-2 justify-center">
+            {[
+              { icon: Users, label: 'Prospects' },
+              { icon: FileText, label: 'Devis' },
+              { icon: BarChart3, label: 'Dashboard' },
+              { icon: TrendingUp, label: 'Suivi' },
+            ].map((feat) => (
+              <div key={feat.label} className="flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 text-brand-700 rounded-full text-xs font-medium">
+                <feat.icon className="w-3 h-3" />
+                {feat.label}
+              </div>
+            ))}
+          </div>
+
           {/* Separator */}
-          <div className="mt-8 mb-6 flex items-center gap-3">
+          <div className="mt-6 sm:mt-8 mb-5 sm:mb-6 flex items-center gap-3">
             <div className="flex-1 h-px bg-gray-200" />
-            <span className="text-xs text-gray-400 font-medium uppercase tracking-wider">Info</span>
+            <span className="text-[11px] text-gray-400 font-medium uppercase tracking-wider">Info</span>
             <div className="flex-1 h-px bg-gray-200" />
           </div>
 
           {/* Demo hint */}
-          <div className="p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
+          <div className="p-3.5 sm:p-4 bg-white rounded-xl border border-gray-100 shadow-sm">
             <p className="text-[13px] text-gray-500 leading-relaxed">
               <span className="font-semibold text-gray-700">Identifiants :</span>{' '}
               Utilisez le compte cree dans votre Supabase Dashboard.
             </p>
           </div>
+
+          {/* Mobile: footer */}
+          <p className="lg:hidden text-center text-[11px] text-gray-400 mt-6 pb-2">
+            Solayia CRM &mdash; Gestion commerciale simplifiee
+          </p>
         </div>
       </div>
 
-      {/* Right: Visual — Hidden on mobile, shown on lg+ */}
+      {/* ============ DESKTOP: Right visual panel ============ */}
       <div className="hidden lg:flex w-[52%] relative overflow-hidden">
         {/* Animated gradient background */}
         <div className="absolute inset-0 bg-gradient-to-br from-brand-600 via-brand-700 to-brand-900 animate-gradient" />
@@ -198,21 +244,6 @@ export default function LoginPage() {
               </div>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Mobile bottom brand bar — shown only on small screens */}
-      <div className="fixed bottom-0 left-0 right-0 lg:hidden bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-3 flex items-center justify-between z-20">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center">
-            <span className="text-white font-bold text-xs">S</span>
-          </div>
-          <span className="text-white/80 text-xs font-medium">Solayia CRM</span>
-        </div>
-        <div className="flex items-center gap-3">
-          {[Users, FileText, BarChart3].map((Icon, i) => (
-            <Icon key={i} className="w-4 h-4 text-white/50" />
-          ))}
         </div>
       </div>
     </div>
