@@ -19,7 +19,7 @@ export async function getDashboardData() {
   const interactions = interactionsRes.data ?? [];
 
   const mrrTotal = clients.reduce((sum: number, c: { mrr: number }) => sum + (c.mrr || 0), 0);
-  const prospectsActifs = prospects.filter((p: { statut: string }) => !['gagne', 'perdu'].includes(p.statut));
+  const prospectsActifs = prospects.filter((p: { statut: string }) => !['suivi', 'termine', 'perdu'].includes(p.statut));
   const devisEnCours = devis.filter((d: { statut: string }) => ['brouillon', 'envoye'].includes(d.statut));
 
   return {

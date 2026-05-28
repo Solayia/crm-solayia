@@ -28,15 +28,18 @@ export async function createProspect(formData: FormData) {
   const supabase = await createClient();
 
   const { error } = await supabase.from('prospects').insert({
-    nom: formData.get('nom') as string,
-    prenom: formData.get('prenom') as string,
-    entreprise: formData.get('entreprise') as string,
+    nom: formData.get('nom') as string || '',
+    prenom: formData.get('prenom') as string || '',
+    entreprise: formData.get('entreprise') as string || '',
     email: formData.get('email') as string || null,
     telephone: formData.get('telephone') as string || null,
     source: formData.get('source') as string || null,
     notes: formData.get('notes') as string || null,
     assigned_to: formData.get('assigned_to') as string || null,
-    statut: 'nouveau' as ProspectStatut,
+    statut: 'prospect' as ProspectStatut,
+    temperature: formData.get('temperature') as string || 'froid',
+    type_contact: formData.get('type_contact') as string || 'prospect',
+    produit_cible: formData.get('produit_cible') as string || 'Solayia',
   });
 
   if (error) {
@@ -102,7 +105,10 @@ export async function updateProspect(id: string, formData: FormData) {
     source: (formData.get('source') as string) || null,
     notes: (formData.get('notes') as string) || null,
     assigned_to: (formData.get('assigned_to') as string) || null,
-    statut: (formData.get('statut') as string) || 'nouveau',
+    statut: (formData.get('statut') as string) || 'prospect',
+    temperature: (formData.get('temperature') as string) || 'froid',
+    type_contact: (formData.get('type_contact') as string) || 'prospect',
+    produit_cible: (formData.get('produit_cible') as string) || '',
     type_prestation: (formData.get('type_prestation') as string) || null,
     description_prestation: (formData.get('description_prestation') as string) || null,
     adresse_chantier: (formData.get('adresse_chantier') as string) || null,

@@ -1,24 +1,64 @@
 // --- Enums / Union Types ---
 
+// Pipeline commercial complet : de la prospection au suivi
 export type ProspectStatut =
-  | 'nouveau'
-  | 'qualifie'
-  | 'premier_contact'
-  | 'rdv'
-  | 'devis'
-  | 'nego'
-  | 'gagne'
+  | 'prospect'
+  | 'prise_contact'
+  | 'r1'
+  | 'r2'
+  | 'proposition'
+  | 'acompte'
+  | 'brief'
+  | 'maquette'
+  | 'validation_maquette'
+  | 'pre_prod'
+  | 'validation_pre_prod'
+  | 'production'
+  | 'suivi'
   | 'perdu';
 
-export const PROSPECT_STATUTS: { value: ProspectStatut; label: string; color: string }[] = [
-  { value: 'nouveau', label: 'Nouveau', color: 'bg-gray-100 text-gray-700' },
-  { value: 'qualifie', label: 'Qualifie', color: 'bg-blue-100 text-blue-700' },
-  { value: 'premier_contact', label: 'Premier contact', color: 'bg-indigo-100 text-indigo-700' },
-  { value: 'rdv', label: 'RDV', color: 'bg-purple-100 text-purple-700' },
-  { value: 'devis', label: 'Devis', color: 'bg-amber-100 text-amber-700' },
-  { value: 'nego', label: 'Nego', color: 'bg-orange-100 text-orange-700' },
-  { value: 'gagne', label: 'Gagne', color: 'bg-green-100 text-green-700' },
-  { value: 'perdu', label: 'Perdu', color: 'bg-red-100 text-red-700' },
+export const PROSPECT_STATUTS: { value: ProspectStatut; label: string; color: string; emoji: string }[] = [
+  { value: 'prospect', label: 'Prospect', color: 'bg-gray-100 text-gray-700', emoji: '🔍' },
+  { value: 'prise_contact', label: 'Prise de contact', color: 'bg-sky-100 text-sky-700', emoji: '📞' },
+  { value: 'r1', label: 'R1', color: 'bg-blue-100 text-blue-700', emoji: '🤝' },
+  { value: 'r2', label: 'R2', color: 'bg-indigo-100 text-indigo-700', emoji: '📋' },
+  { value: 'proposition', label: 'Proposition', color: 'bg-violet-100 text-violet-700', emoji: '📄' },
+  { value: 'acompte', label: 'Acompte', color: 'bg-purple-100 text-purple-700', emoji: '💰' },
+  { value: 'brief', label: 'Brief', color: 'bg-fuchsia-100 text-fuchsia-700', emoji: '📝' },
+  { value: 'maquette', label: 'Maquette', color: 'bg-pink-100 text-pink-700', emoji: '🎨' },
+  { value: 'validation_maquette', label: 'Valid. maquette', color: 'bg-rose-100 text-rose-700', emoji: '✅' },
+  { value: 'pre_prod', label: 'Pre-prod', color: 'bg-amber-100 text-amber-700', emoji: '🔧' },
+  { value: 'validation_pre_prod', label: 'Valid. pre-prod', color: 'bg-orange-100 text-orange-700', emoji: '👁️' },
+  { value: 'production', label: 'Production', color: 'bg-emerald-100 text-emerald-700', emoji: '🚀' },
+  { value: 'suivi', label: 'Suivi', color: 'bg-green-100 text-green-700', emoji: '🏁' },
+  { value: 'perdu', label: 'Perdu', color: 'bg-red-100 text-red-700', emoji: '❌' },
+];
+
+// Etapes avant signature (pipeline commercial)
+export const PIPELINE_COMMERCIAL = PROSPECT_STATUTS.filter(
+  s => ['prospect', 'prise_contact', 'r1', 'r2', 'proposition', 'acompte'].includes(s.value)
+);
+
+// Etapes apres signature (gestion de projet/chantier)
+export const PIPELINE_PROJET = PROSPECT_STATUTS.filter(
+  s => ['brief', 'maquette', 'validation_maquette', 'pre_prod', 'validation_pre_prod', 'production', 'suivi'].includes(s.value)
+);
+
+// Type de contact : prospect classique ou prescripteur
+export type TypeContact = 'prospect' | 'prescripteur';
+
+export const TYPES_CONTACT: { value: TypeContact; label: string; color: string; emoji: string }[] = [
+  { value: 'prospect', label: 'Prospect', color: 'bg-blue-100 text-blue-700', emoji: '🎯' },
+  { value: 'prescripteur', label: 'Prescripteur', color: 'bg-teal-100 text-teal-700', emoji: '🤝' },
+];
+
+// Temperature du prospect
+export type ProspectTemperature = 'chaud' | 'tiede' | 'froid';
+
+export const PROSPECT_TEMPERATURES: { value: ProspectTemperature; label: string; color: string; emoji: string }[] = [
+  { value: 'chaud', label: 'Chaud', color: 'bg-red-100 text-red-700', emoji: '🔥' },
+  { value: 'tiede', label: 'Tiede', color: 'bg-amber-100 text-amber-700', emoji: '🌤️' },
+  { value: 'froid', label: 'Froid', color: 'bg-blue-100 text-blue-700', emoji: '❄️' },
 ];
 
 export type DevisStatut = 'brouillon' | 'envoye' | 'accepte' | 'refuse' | 'expire';
@@ -78,6 +118,19 @@ export const TYPES_PRESTATION = [
   'Autre',
 ];
 
+export const SOURCES_PROSPECT = [
+  'Site web',
+  'Google Ads',
+  'Bouche a oreille',
+  'Recommandation',
+  'Salon professionnel',
+  'Reseaux sociaux',
+  'Corporate Connections',
+  'Prospection terrain',
+  'Demarchage telephone',
+  'Autre',
+];
+
 export interface Prospect {
   id: string;
   nom: string;
@@ -86,7 +139,10 @@ export interface Prospect {
   email: string;
   telephone: string;
   statut: ProspectStatut;
+  temperature: ProspectTemperature;
+  type_contact: TypeContact;
   source: string;
+  produit_cible: string;
   notes: string | null;
   assigned_to: string | null;
   assigned_profile?: Profile;

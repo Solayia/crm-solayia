@@ -6,10 +6,15 @@ import {
   ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, MapPin,
   User, Calendar, Clock, X, Plus, MessageSquare, PhoneCall, MailIcon,
   MessageCircle, Bell, AlertTriangle, Briefcase, FileText, ChevronDown,
+  Flame, Snowflake, Sun, Users,
 } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
-import { PROSPECT_STATUTS, PROSPECT_URGENCES, TYPES_PRESTATION } from '@/lib/types';
-import type { ProspectStatut, ProspectUrgence } from '@/lib/types';
+import {
+  PROSPECT_STATUTS, PROSPECT_URGENCES, TYPES_PRESTATION,
+  PROSPECT_TEMPERATURES, TYPES_CONTACT, SOURCES_PROSPECT,
+  PIPELINE_COMMERCIAL, PIPELINE_PROJET,
+} from '@/lib/types';
+import type { ProspectStatut, ProspectUrgence, ProspectTemperature, TypeContact } from '@/lib/types';
 import {
   getProspect, getProfiles, updateProspect, deleteProspect,
   getProspectInteractions, createInteraction, deleteInteraction,
@@ -22,6 +27,12 @@ const INTERACTION_TYPES = [
   { value: 'rdv', label: 'RDV', icon: Calendar, color: 'text-purple-600 bg-purple-50' },
   { value: 'note', label: 'Note / SMS', icon: MessageCircle, color: 'text-amber-600 bg-amber-50' },
 ];
+
+const tempConfig: Record<string, { icon: typeof Flame; color: string; bg: string }> = {
+  chaud: { icon: Flame, color: 'text-red-500', bg: 'bg-red-50 border-red-200' },
+  tiede: { icon: Sun, color: 'text-amber-500', bg: 'bg-amber-50 border-amber-200' },
+  froid: { icon: Snowflake, color: 'text-blue-500', bg: 'bg-blue-50 border-blue-200' },
+};
 
 export default function ProspectDetailPage() {
   const params = useParams();
@@ -47,7 +58,10 @@ export default function ProspectDetailPage() {
   const [telephone, setTelephone] = useState('');
   const [source, setSource] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
-  const [statut, setStatut] = useState<ProspectStatut>('nouveau');
+  const [statut, setStatut] = useState<ProspectStatut>('prospect');
+  const [temperature, setTemperature] = useState<ProspectTemperature>('froid');
+  const [typeContact, setTypeContact] = useState<TypeContact>('prospect');
+  const [produitCible, setProduitCible] = useState('');
   const [notes, setNotes] = useState('');
 
   // Form fields — Prestation
@@ -75,7 +89,10 @@ export default function ProspectDetailPage() {
       setTelephone(p.telephone || '');
       setSource(p.source || '');
       setAssignedTo(p.assigned_to || '');
-      setStatut(p.statut || 'nouveau');
+      setStatut(p.statut || 'prospect');
+      setTemperature(p.temperature || 'froid');
+      setTypeContact(p.type_contact || 'prospect');
+      setProduitCible(p.produit_cible || '');
       setNotes(p.notes || '');
       setTypePrestation(p.type_prestation || '');
       setDescriptionPrestation(p.description_prestation || '');
@@ -104,6 +121,9 @@ export default function ProspectDetailPage() {
     formData.set('source', source);
     formData.set('assigned_to', assignedTo);
     formData.set('statut', statut);
+    formData.set('temperature', temperature);
+    formData.set('type_contact', typeContact);
+    formData.set('produit_cible', produitCible);
     formData.set('notes', notes);
     formData.set('type_prestation', typePrestation);
     formData.set('description_prestation', descriptionPrestation);
@@ -169,7 +189,15 @@ export default function ProspectDetailPage() {
 
   const statutInfo = PROSPECT_STATUTS.find(s => s.value === statut);
   const urgenceInfo = PROSPECT_URGENCES.find(u => u.value === urgence);
+  const tempInfo = tempConfig[temperature] || tempConfig.froid;
+  const TempIcon = tempInfo.icon;
   const isRelancePassee = dateRelance && new Date(dateRelance) < new Date();
+  const displayName = entreprise || `${prenom} ${nom}`.trim() || 'Sans nom';
+
+  // Determiner la position dans le pipeline
+  const allSteps = [...PIPELINE_COMMERCIAL.map(s => s.value), ...PIPELINE_PROJET.map(s => s.value)];
+  const currentStepIdx = allSteps.indexOf(statut);
+  const progressPct = currentStepIdx >= 0 ? Math.round(((currentStepIdx + 1) / allSteps.length) * 100) : 0;
 
   return (
     <div className="space-y-4 max-w-4xl">
@@ -179,15 +207,20 @@ export default function ProspectDetailPage() {
           <button onClick={() => router.push('/prospects')} className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg shrink-0">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-brand-50 text-brand-700 flex items-center justify-center text-sm sm:text-base font-bold shrink-0">
-            {getInitials(entreprise || `${prenom} ${nom}`)}
+          <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center text-sm sm:text-base font-bold shrink-0 border ${tempInfo.bg}`}>
+            <TempIcon className={`w-5 h-5 sm:w-6 sm:h-6 ${tempInfo.color}`} />
           </div>
           <div className="min-w-0">
-            <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{entreprise || `${prenom} ${nom}`}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-900 truncate">{displayName}</h1>
+              {typeContact === 'prescripteur' && (
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-teal-100 text-teal-700 shrink-0">Prescripteur</span>
+              )}
+            </div>
             <div className="flex items-center gap-2 flex-wrap">
-              {entreprise && <p className="text-sm text-gray-500">{prenom} {nom}</p>}
+              {entreprise && (prenom || nom) && <p className="text-sm text-gray-500">{prenom} {nom}</p>}
               <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${statutInfo?.color || 'bg-gray-100 text-gray-600'}`}>
-                {statutInfo?.label || statut}
+                {statutInfo?.emoji} {statutInfo?.label || statut}
               </span>
               {urgence !== 'normale' && (
                 <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${urgenceInfo?.color || ''}`}>
@@ -208,6 +241,26 @@ export default function ProspectDetailPage() {
           </button>
         </div>
       </div>
+
+      {/* Barre de progression pipeline */}
+      {statut !== 'perdu' && currentStepIdx >= 0 && (
+        <div className="card p-4">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-gray-700">Progression</span>
+            <span className="text-xs font-bold text-brand-600">{progressPct}%</span>
+          </div>
+          <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+            <div
+              className="h-full rounded-full bg-gradient-to-r from-brand-500 to-brand-600 transition-all duration-500"
+              style={{ width: `${progressPct}%` }}
+            />
+          </div>
+          <div className="flex items-center justify-between mt-2">
+            <span className="text-[10px] text-gray-400">Prospect</span>
+            <span className="text-[10px] text-gray-400">Suivi</span>
+          </div>
+        </div>
+      )}
 
       {/* Alerte relance */}
       {isRelancePassee && (
@@ -239,16 +292,50 @@ export default function ProspectDetailPage() {
         ))}
       </div>
 
-      {/* Section 1 : Infos contact + statut */}
+      {/* Section 1 : Infos contact + statut + temperature */}
       <div className={`card p-5 sm:p-6 ${activeSection !== 'info' ? 'hidden sm:block' : ''}`}>
         <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <User className="w-4 h-4 text-brand-600" />
           Informations contact
         </h2>
         <div className="space-y-4">
+          {/* Type contact + Temperature */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Nom *</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Type de contact</label>
+              <select value={typeContact} onChange={(e) => setTypeContact(e.target.value as TypeContact)} className="input-field">
+                {TYPES_CONTACT.map((t) => (<option key={t.value} value={t.value}>{t.emoji} {t.label}</option>))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Temperature</label>
+              <div className="flex gap-2">
+                {PROSPECT_TEMPERATURES.map((t) => {
+                  const isActive = temperature === t.value;
+                  return (
+                    <button
+                      key={t.value}
+                      type="button"
+                      onClick={() => setTemperature(t.value)}
+                      className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                        isActive
+                          ? t.value === 'chaud' ? 'border-red-400 bg-red-50 text-red-700'
+                            : t.value === 'tiede' ? 'border-amber-400 bg-amber-50 text-amber-700'
+                            : 'border-blue-400 bg-blue-50 text-blue-700'
+                          : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                      }`}
+                    >
+                      {t.emoji} {t.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Nom</label>
               <input value={nom} onChange={(e) => setNom(e.target.value)} className="input-field" />
             </div>
             <div>
@@ -272,26 +359,35 @@ export default function ProspectDetailPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Statut</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Etape pipeline</label>
               <select value={statut} onChange={(e) => setStatut(e.target.value as ProspectStatut)} className="input-field">
-                {PROSPECT_STATUTS.map((s) => (<option key={s.value} value={s.value}>{s.label}</option>))}
+                <optgroup label="Pipeline commercial">
+                  {PIPELINE_COMMERCIAL.map((s) => (<option key={s.value} value={s.value}>{s.emoji} {s.label}</option>))}
+                </optgroup>
+                <optgroup label="Gestion projet">
+                  {PIPELINE_PROJET.map((s) => (<option key={s.value} value={s.value}>{s.emoji} {s.label}</option>))}
+                </optgroup>
+                <option value="perdu">❌ Perdu</option>
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Source</label>
               <select value={source} onChange={(e) => setSource(e.target.value)} className="input-field">
                 <option value="">—</option>
-                <option>Site web</option><option>Google Ads</option><option>Bouche a oreille</option>
-                <option>Recommandation</option><option>Salon professionnel</option><option>Reseaux sociaux</option>
+                {SOURCES_PROSPECT.map((s) => (<option key={s} value={s}>{s}</option>))}
               </select>
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1">Assigne a</label>
               <select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} className="input-field">
                 <option value="">—</option>
-                {profiles.map((p) => (<option key={p.id} value={p.id}>{p.full_name}</option>))}
+                {profiles.map((pr) => (<option key={pr.id} value={pr.id}>{pr.full_name}</option>))}
               </select>
             </div>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Produit cible</label>
+            <input value={produitCible} onChange={(e) => setProduitCible(e.target.value)} className="input-field" placeholder="Ex: Solayia, Installe ta Clim..." />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Notes internes</label>
@@ -457,7 +553,6 @@ export default function ProspectDetailPage() {
               <button onClick={() => setShowInteractionForm(false)} className="p-2 text-gray-400 hover:text-gray-600 -mr-2"><X className="w-5 h-5" /></button>
             </div>
             <form onSubmit={handleCreateInteraction} className="space-y-4">
-              {/* Type selection as buttons */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Type d&apos;echange</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
