@@ -184,6 +184,9 @@ export interface Prospect {
   prescripteur_ref: string | null;
   site_web: string | null;
   traits_personnalite: string | null;
+  // --- Qualification & conversion ---
+  prospect_checklist: Record<string, boolean> | null;
+  motif_perte: string | null;
 }
 
 export interface Client {

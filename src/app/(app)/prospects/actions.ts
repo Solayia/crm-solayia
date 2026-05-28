@@ -214,3 +214,91 @@ export async function getProspectDevis(prospectId: string) {
   }
   return data ?? [];
 }
+
+// --- Conversion prospect → client ---
+
+export async function convertToClient(prospectId: string) {
+  const supabase = await createClient();
+
+  // 1. Fetch prospect data
+  const { data: prospect, error: fetchError } = await supabase
+    .from('prospects')
+    .select('nom, prenom, entreprise, email, telephone, notes, tarif_propose')
+    .eq('id', prospectId)
+    .single();
+
+  if (fetchError || !prospect) {
+    return { error: 'Prospect introuvable' };
+  }
+
+  // 2. Create client row
+  const { data: client, error: clientError } = await supabase
+    .from('clients')
+    .insert({
+      nom: prospect.nom,
+      prenom: prospect.prenom,
+      entreprise: prospect.entreprise,
+      email: prospect.email,
+      telephone: prospect.telephone,
+      notes: prospect.notes,
+      mrr: 0,
+      prospect_origine_id: prospectId,
+    })
+    .select('id')
+    .single();
+
+  if (clientError) {
+    return { error: clientError.message };
+  }
+
+  // 3. Move prospect to first project stage
+  const { error: updateError } = await supabase
+    .from('prospects')
+    .update({ statut: 'brief' })
+    .eq('id', prospectId);
+
+  if (updateError) {
+    return { error: updateError.message };
+  }
+
+  revalidatePath('/prospects');
+  revalidatePath('/clients');
+  revalidatePath('/dashboard');
+
+  return { success: true, clientId: client.id };
+}
+
+// --- Checklist de qualification ---
+
+export async function updateProspectChecklist(
+  prospectId: string,
+  checklist: Record<string, boolean>
+) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('prospects')
+    .update({ prospect_checklist: checklist })
+    .eq('id', prospectId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/prospects/${prospectId}`);
+  return { success: true };
+}
+
+// --- Motif de perte ---
+
+export async function updateMotifPerte(prospectId: string, motif: string) {
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('prospects')
+    .update({ motif_perte: motif, statut: 'perdu' as ProspectStatut })
+    .eq('id', prospectId);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/prospects/${prospectId}`);
+  revalidatePath('/prospects');
+  revalidatePath('/dashboard');
+  return { success: true };
+}
