@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, FileText, Calendar, Clock, X, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, Calendar, Clock, X, Plus } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import { PROJET_STATUTS } from '@/lib/types';
 import type { ProjetStatut } from '@/lib/types';
-import { getClient, getClientProjets, getClientDevis, updateClientAction, deleteClientAction } from '../actions';
+import { getClient, getClientProjets, updateClientAction, deleteClientAction } from '../actions';
 import { updateProjetAction, createProjetAction, deleteProjet } from '../../projets/actions';
 
 export default function ClientDetailPage() {
@@ -16,7 +16,6 @@ export default function ClientDetailPage() {
 
   const [client, setClient] = useState<any>(null);
   const [projets, setProjets] = useState<any[]>([]);
-  const [devis, setDevis] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -34,10 +33,9 @@ export default function ClientDetailPage() {
   const [notes, setNotes] = useState('');
 
   const loadData = useCallback(async () => {
-    const [c, p, d] = await Promise.all([
+    const [c, p] = await Promise.all([
       getClient(clientId),
       getClientProjets(clientId),
-      getClientDevis(clientId),
     ]);
     if (c) {
       setClient(c);
@@ -50,7 +48,6 @@ export default function ClientDetailPage() {
       setNotes(c.notes || '');
     }
     setProjets(p);
-    setDevis(d);
     setLoading(false);
   }, [clientId]);
 
@@ -257,30 +254,6 @@ export default function ClientDetailPage() {
           </div>
         )}
       </div>
-
-      {/* Devis section */}
-      {devis.length > 0 && (
-        <div className="card p-5 sm:p-6">
-          <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
-            <FileText className="w-4 h-4 text-brand-600" />
-            Devis ({devis.length})
-          </h2>
-          <div className="space-y-2">
-            {devis.map((d) => (
-              <div key={d.id} className="flex items-center justify-between p-3 border border-gray-100 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm font-mono">{d.numero}</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="text-sm font-semibold text-gray-900">{formatCurrency(d.montant_ttc)} TTC</span>
-                  <span className="text-xs text-gray-400">{formatDate(d.date_emission)}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Client since */}
       <p className="text-xs text-gray-400 text-center">Client depuis le {formatDate(client.created_at)}</p>

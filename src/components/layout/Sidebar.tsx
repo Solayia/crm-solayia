@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation';
 import { cn, getInitials } from '@/lib/utils';
 import { logoutAction } from '@/app/(auth)/login/actions';
 import {
-  LayoutDashboard, Target, Users, FileText, FolderKanban,
+  LayoutDashboard, Target, Users, FolderKanban,
   Settings, Building2, UsersRound, ChevronLeft, ChevronRight, LogOut, X,
 } from 'lucide-react';
 
@@ -16,7 +16,6 @@ const mainNav = [
 ];
 
 const commercialNav = [
-  { href: '/devis', label: 'Devis', icon: FileText },
   { href: '/projets', label: 'Projets', icon: FolderKanban },
 ];
 

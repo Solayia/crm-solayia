@@ -48,21 +48,6 @@ export async function getClientProjets(clientId: string) {
   return data ?? [];
 }
 
-export async function getClientDevis(clientId: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('devis')
-    .select('*')
-    .eq('client_id', clientId)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    console.error('getClientDevis error:', error);
-    return [];
-  }
-  return data ?? [];
-}
-
 export async function createClientAction(formData: FormData) {
   const supabase = await createClient();
 
