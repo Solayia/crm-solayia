@@ -20,6 +20,7 @@ import {
   getProspectInteractions, createInteraction, deleteInteraction,
   getProspectDevis,
 } from '../actions';
+import ProspectCommunications from '@/components/prospects/ProspectCommunications';
 
 const INTERACTION_TYPES = [
   { value: 'appel', label: 'Appel', icon: PhoneCall, color: 'text-green-600 bg-green-50' },
@@ -260,6 +261,17 @@ export default function ProspectDetailPage() {
             <span className="text-[10px] text-gray-400">Suivi</span>
           </div>
         </div>
+      )}
+
+      {/* Communications automatiques — visible uniquement en Prise de contact */}
+      {statut === 'prise_contact' && (
+        <ProspectCommunications prospect={{
+          nom, prenom, entreprise, email, telephone,
+          temperature, source,
+          type_prestation: typePrestation || null,
+          produit_cible: produitCible,
+          notes: notes || null,
+        }} />
       )}
 
       {/* Alerte relance */}
