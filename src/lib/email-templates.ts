@@ -135,6 +135,82 @@ export function generateEmailFlyer(prospect: ProspectData): { subject: string; b
   const services = getServicesSuggeres(secteur);
   const accroche = getAccrocheSecteur(secteur);
 
+  // Prestations adaptees au secteur (grille 2x4 comme le vrai flyer)
+  const prestationsSecteur: Record<string, { icon: string; titre: string; desc: string }[]> = {
+    restauration: [
+      { icon: '🌐', titre: 'Site vitrine', desc: 'Carte, photos, ambiance' },
+      { icon: '📅', titre: 'Reservation en ligne', desc: 'Reservations 24h/24' },
+      { icon: '🔍', titre: 'SEO local', desc: 'N°1 sur Google Maps' },
+      { icon: '📸', titre: 'Photos pro', desc: 'Vos plats en valeur' },
+      { icon: '⭐', titre: 'Avis Google', desc: 'Gestion & reponses' },
+      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Instagram & Facebook' },
+      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
+      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
+    ],
+    btp: [
+      { icon: '🌐', titre: 'Site professionnel', desc: 'Credibilite & confiance' },
+      { icon: '🏗️', titre: 'Portfolio projets', desc: 'Vos realisations en vitrine' },
+      { icon: '🔍', titre: 'SEO local', desc: 'Visible dans votre zone' },
+      { icon: '📋', titre: 'Devis en ligne', desc: 'Formulaire automatise' },
+      { icon: '⭐', titre: 'Avis clients', desc: 'Temoignages & confiance' },
+      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Avant/apres chantiers' },
+      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
+      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
+    ],
+    immobilier: [
+      { icon: '🌐', titre: 'Site immobilier', desc: 'Catalogue de biens' },
+      { icon: '🏠', titre: 'Estimation en ligne', desc: 'Captation de mandats' },
+      { icon: '🔍', titre: 'SEO local', desc: 'Visible sur Google' },
+      { icon: '📸', titre: 'Visuels premium', desc: 'Photos & visites 3D' },
+      { icon: '⭐', titre: 'Avis clients', desc: 'Reputation en ligne' },
+      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Biens & temoignages' },
+      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
+      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
+    ],
+    general: [
+      { icon: '🌐', titre: 'Creation de site web', desc: 'Vitrine professionnelle' },
+      { icon: '🔄', titre: 'Refonte de site', desc: 'Modernisation complete' },
+      { icon: '🛠️', titre: 'Maintenance', desc: 'Mises a jour & evolution' },
+      { icon: '🔍', titre: 'SEO & Referencement', desc: 'Visible sur Google' },
+      { icon: '🛒', titre: 'E-commerce', desc: 'Vente en ligne' },
+      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Strategie & contenus' },
+      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
+      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
+    ],
+  };
+
+  const prestations = prestationsSecteur[secteur] || prestationsSecteur.general;
+
+  // Raisons "Pourquoi Solayia" adaptees au secteur
+  const raisonsSecteur: Record<string, string[]> = {
+    restauration: [
+      'Un site attractif qui donne envie de reserver, pret en 4 semaines',
+      'Une approche specialisee restauration, on connait votre metier',
+      'Un accompagnement de A a Z, sans jargon technique',
+      'Des resultats mesurables : plus de couverts, plus de reservations',
+    ],
+    btp: [
+      'Un site professionnel qui inspire confiance, pret en 4 semaines',
+      'Une vitrine de vos realisations qui parle pour vous',
+      'Un accompagnement de A a Z, sans jargon technique',
+      'Des resultats mesurables : plus de demandes de devis qualifiees',
+    ],
+    immobilier: [
+      'Un site qui capte des mandats 24h/24, pret en 4 semaines',
+      'Une approche adaptee a l\'immobilier et ses specificites',
+      'Un accompagnement de A a Z, sans jargon technique',
+      'Des resultats mesurables : plus de leads vendeurs et acheteurs',
+    ],
+    general: [
+      'Un site professionnel, pret en 4 semaines',
+      'Une approche personnalisee, adaptee a votre metier',
+      'Un accompagnement de A a Z, sans jargon',
+      'Des resultats mesurables, pas des promesses',
+    ],
+  };
+
+  const raisons = raisonsSecteur[secteur] || raisonsSecteur.general;
+
   const subject = entreprise !== 'votre entreprise'
     ? `${entreprise} — Decouvrez ce qu'on peut faire pour vous`
     : `Votre croissance digitale commence ici`;
@@ -154,67 +230,137 @@ Co-fondateur — Solayia
 contact@solayia.fr`;
 
   const flyerHtml = `
-<div style="max-width:600px;margin:0 auto;font-family:'Inter',Arial,sans-serif;background:#FFFFFF;border-radius:16px;overflow:hidden;border:1px solid #E2E8F0;">
-  <!-- Header -->
-  <div style="background:linear-gradient(135deg,#0A1A3A 0%,#1B2D5B 100%);padding:40px 32px;text-align:center;">
-    <h1 style="color:#D4A84B;font-size:28px;margin:0 0 4px;font-weight:800;letter-spacing:-0.02em;">SOLAYIA</h1>
-    <p style="color:#CBD5E1;font-size:13px;margin:0;letter-spacing:0.1em;">AGENCE WEB & DIGITALE</p>
+<div style="max-width:600px;margin:0 auto;font-family:Georgia,'Times New Roman',serif;background:#FFFFFF;overflow:hidden;border:1px solid #D4A84B;">
+
+  <!-- ====== HEADER EDITORIAL ====== -->
+  <div style="background:#0B1D3A;padding:36px 32px 28px;text-align:center;position:relative;">
+    <!-- Ligne decorative gold -->
+    <div style="width:60px;height:2px;background:#D4A84B;margin:0 auto 16px;"></div>
+    <h1 style="color:#D4A84B;font-size:36px;margin:0 0 2px;font-weight:400;letter-spacing:0.08em;font-family:Georgia,'Times New Roman',serif;">SOLAYIA.</h1>
+    <p style="color:#94A3B8;font-size:11px;margin:0 0 12px;letter-spacing:0.25em;font-family:'Inter',Arial,sans-serif;text-transform:uppercase;">l'agence digitale qui fait grandir les TPE</p>
+    <div style="display:flex;justify-content:center;align-items:center;gap:12px;">
+      <span style="color:#64748B;font-size:9px;letter-spacing:0.15em;font-family:'Inter',Arial,sans-serif;">EST. 2024</span>
+      <span style="color:#D4A84B;font-size:8px;">◆</span>
+      <span style="color:#64748B;font-size:9px;letter-spacing:0.15em;font-family:'Inter',Arial,sans-serif;">TOULOUSE · FRANCE</span>
+    </div>
   </div>
 
-  <!-- Accroche personnalisee -->
-  <div style="padding:32px;text-align:center;background:#FAFAFA;">
-    <h2 style="color:#0A1A3A;font-size:20px;margin:0 0 8px;font-weight:700;">
-      ${entreprise !== 'votre entreprise' ? entreprise + ',' : ''} Et si vos clients venaient a vous ?
+  <!-- ====== HERO — ACCROCHE PERSONNALISEE ====== -->
+  <div style="padding:36px 32px 28px;text-align:center;border-bottom:1px solid #F1F5F9;">
+    ${entreprise !== 'votre entreprise' ? `<p style="color:#D4A84B;font-size:11px;margin:0 0 8px;letter-spacing:0.2em;font-family:'Inter',Arial,sans-serif;text-transform:uppercase;">Pour ${entreprise}</p>` : ''}
+    <h2 style="color:#0B1D3A;font-size:24px;margin:0 0 16px;font-weight:400;line-height:1.3;font-family:Georgia,'Times New Roman',serif;">
+      Votre presence en ligne<br>merite d'etre remarquee.
     </h2>
-    <p style="color:#64748B;font-size:14px;line-height:1.6;margin:0;">
+    <p style="color:#64748B;font-size:13px;line-height:1.7;margin:0;max-width:440px;display:inline-block;font-family:'Inter',Arial,sans-serif;">
       ${accroche}
     </p>
   </div>
 
-  <!-- Services -->
-  <div style="padding:24px 32px;">
-    <h3 style="color:#1B2D5B;font-size:16px;margin:0 0 16px;font-weight:700;text-align:center;">
-      Ce qu'on peut faire pour vous
-    </h3>
-    ${services.map(s => `
-    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid #F1F5F9;">
-      <div style="width:32px;height:32px;background:#FEF3C7;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
-        <span style="color:#D4A84B;font-size:16px;">✦</span>
+  <!-- ====== NOS PRESTATIONS — Grille 2x4 ====== -->
+  <div style="padding:28px 24px 20px;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:40px;height:1px;background:#D4A84B;margin:0 auto 12px;"></div>
+      <h3 style="color:#0B1D3A;font-size:18px;margin:0;font-weight:400;font-family:Georgia,'Times New Roman',serif;">Nos prestations</h3>
+    </div>
+
+    <!-- Row 1 -->
+    <div style="display:flex;gap:12px;margin-bottom:12px;">
+      ${prestations.slice(0, 2).map(p => `
+      <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px 12px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:6px;">${p.icon}</div>
+        <div style="color:#0B1D3A;font-size:12px;font-weight:700;margin-bottom:2px;font-family:'Inter',Arial,sans-serif;">${p.titre}</div>
+        <div style="color:#94A3B8;font-size:10px;font-family:'Inter',Arial,sans-serif;">${p.desc}</div>
+      </div>`).join('')}
+    </div>
+    <!-- Row 2 -->
+    <div style="display:flex;gap:12px;margin-bottom:12px;">
+      ${prestations.slice(2, 4).map(p => `
+      <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px 12px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:6px;">${p.icon}</div>
+        <div style="color:#0B1D3A;font-size:12px;font-weight:700;margin-bottom:2px;font-family:'Inter',Arial,sans-serif;">${p.titre}</div>
+        <div style="color:#94A3B8;font-size:10px;font-family:'Inter',Arial,sans-serif;">${p.desc}</div>
+      </div>`).join('')}
+    </div>
+    <!-- Row 3 -->
+    <div style="display:flex;gap:12px;margin-bottom:12px;">
+      ${prestations.slice(4, 6).map(p => `
+      <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px 12px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:6px;">${p.icon}</div>
+        <div style="color:#0B1D3A;font-size:12px;font-weight:700;margin-bottom:2px;font-family:'Inter',Arial,sans-serif;">${p.titre}</div>
+        <div style="color:#94A3B8;font-size:10px;font-family:'Inter',Arial,sans-serif;">${p.desc}</div>
+      </div>`).join('')}
+    </div>
+    <!-- Row 4 -->
+    <div style="display:flex;gap:12px;">
+      ${prestations.slice(6, 8).map(p => `
+      <div style="flex:1;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:8px;padding:16px 12px;text-align:center;">
+        <div style="font-size:24px;margin-bottom:6px;">${p.icon}</div>
+        <div style="color:#0B1D3A;font-size:12px;font-weight:700;margin-bottom:2px;font-family:'Inter',Arial,sans-serif;">${p.titre}</div>
+        <div style="color:#94A3B8;font-size:10px;font-family:'Inter',Arial,sans-serif;">${p.desc}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- ====== STATS BAR ====== -->
+  <div style="background:#0B1D3A;padding:20px 32px;display:flex;justify-content:space-around;align-items:center;">
+    <div style="text-align:center;">
+      <div style="color:#D4A84B;font-size:28px;font-weight:800;font-family:'Inter',Arial,sans-serif;">80%</div>
+      <div style="color:#94A3B8;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',Arial,sans-serif;">Visibilite en hausse</div>
+    </div>
+    <div style="width:1px;height:36px;background:#1E3A5F;"></div>
+    <div style="text-align:center;">
+      <div style="color:#D4A84B;font-size:28px;font-weight:800;font-family:'Inter',Arial,sans-serif;">x3</div>
+      <div style="color:#94A3B8;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',Arial,sans-serif;">Plus de leads</div>
+    </div>
+    <div style="width:1px;height:36px;background:#1E3A5F;"></div>
+    <div style="text-align:center;">
+      <div style="color:#D4A84B;font-size:28px;font-weight:800;font-family:'Inter',Arial,sans-serif;">100%</div>
+      <div style="color:#94A3B8;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;font-family:'Inter',Arial,sans-serif;">Sur-mesure</div>
+    </div>
+  </div>
+
+  <!-- ====== POURQUOI SOLAYIA ====== -->
+  <div style="padding:28px 32px;border-bottom:1px solid #F1F5F9;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:40px;height:1px;background:#D4A84B;margin:0 auto 12px;"></div>
+      <h3 style="color:#0B1D3A;font-size:18px;margin:0;font-weight:400;font-family:Georgia,'Times New Roman',serif;">Pourquoi Solayia</h3>
+    </div>
+    ${raisons.map((r, i) => `
+    <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:${i < raisons.length - 1 ? '14' : '0'}px;">
+      <div style="width:20px;height:20px;background:#0B1D3A;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;">
+        <span style="color:#D4A84B;font-size:10px;font-weight:700;font-family:'Inter',Arial,sans-serif;">${i + 1}</span>
       </div>
-      <span style="color:#0F172A;font-size:14px;font-weight:500;">${s}</span>
+      <p style="color:#334155;font-size:13px;line-height:1.5;margin:0;font-family:'Inter',Arial,sans-serif;">${r}</p>
     </div>`).join('')}
   </div>
 
-  <!-- Stats -->
-  <div style="padding:24px 32px;background:#F8FAFC;text-align:center;">
-    <div style="display:inline-block;margin:0 16px;text-align:center;">
-      <div style="color:#1B2D5B;font-size:28px;font-weight:800;">+80%</div>
-      <div style="color:#64748B;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Visibilite</div>
-    </div>
-    <div style="display:inline-block;margin:0 16px;text-align:center;">
-      <div style="color:#1B2D5B;font-size:28px;font-weight:800;">x3</div>
-      <div style="color:#64748B;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Leads / mois</div>
-    </div>
-    <div style="display:inline-block;margin:0 16px;text-align:center;">
-      <div style="color:#1B2D5B;font-size:28px;font-weight:800;">100%</div>
-      <div style="color:#64748B;font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">Sur-mesure</div>
-    </div>
-  </div>
-
-  <!-- CTA -->
-  <div style="padding:32px;text-align:center;">
-    <p style="color:#64748B;font-size:14px;margin:0 0 16px;">Pret a passer a l'action ?</p>
-    <a href="mailto:contact@solayia.fr?subject=RDV%20Solayia" style="display:inline-block;background:linear-gradient(135deg,#D4A84B,#B8902E);color:#FFFFFF;text-decoration:none;padding:14px 32px;border-radius:10px;font-weight:700;font-size:15px;">
-      Prendre rendez-vous →
+  <!-- ====== CTA ====== -->
+  <div style="padding:28px 32px;text-align:center;background:#FAFBFC;">
+    <p style="color:#0B1D3A;font-size:16px;margin:0 0 6px;font-family:Georgia,'Times New Roman',serif;font-style:italic;">
+      Discutons de votre projet —
+    </p>
+    <p style="color:#D4A84B;font-size:13px;margin:0 0 18px;font-weight:600;font-family:'Inter',Arial,sans-serif;">
+      le premier echange est offert.
+    </p>
+    <a href="mailto:contact@solayia.fr?subject=${encodeURIComponent(entreprise !== 'votre entreprise' ? `RDV Solayia x ${entreprise}` : 'RDV Solayia')}" style="display:inline-block;background:#0B1D3A;color:#D4A84B;text-decoration:none;padding:14px 36px;border-radius:4px;font-weight:700;font-size:13px;letter-spacing:0.05em;font-family:'Inter',Arial,sans-serif;border:1px solid #D4A84B;">
+      PRENDRE RENDEZ-VOUS →
     </a>
   </div>
 
-  <!-- Footer -->
-  <div style="background:#0A1A3A;padding:20px 32px;text-align:center;">
-    <p style="color:#D4A84B;font-size:14px;font-weight:700;margin:0 0 4px;">Solayia</p>
-    <p style="color:#94A3B8;font-size:12px;margin:0;">contact@solayia.fr — solayia.fr — Toulouse</p>
-    <p style="color:#64748B;font-size:11px;margin:8px 0 0;">Avec Solayia, les clients viennent a vous.</p>
+  <!-- ====== FOOTER ====== -->
+  <div style="background:#0B1D3A;padding:24px 32px;text-align:center;">
+    <p style="color:#D4A84B;font-size:20px;margin:0 0 4px;font-family:Georgia,'Times New Roman',serif;letter-spacing:0.05em;">SOLAYIA.</p>
+    <p style="color:#94A3B8;font-size:10px;margin:0 0 10px;letter-spacing:0.15em;font-family:'Inter',Arial,sans-serif;">L'AGENCE DIGITALE QUI FAIT GRANDIR LES TPE</p>
+    <div style="width:40px;height:1px;background:#D4A84B;margin:0 auto 10px;"></div>
+    <p style="color:#64748B;font-size:11px;margin:0;line-height:1.6;font-family:'Inter',Arial,sans-serif;">
+      contact@solayia.fr · solayia.fr<br>
+      Toulouse, France
+    </p>
+    <p style="color:#475569;font-size:10px;margin:10px 0 0;font-style:italic;font-family:Georgia,'Times New Roman',serif;">
+      Avec Solayia, les clients viennent a vous.
+    </p>
   </div>
+
 </div>`;
 
   return { subject, body, flyerHtml };
@@ -385,4 +531,121 @@ contact@solayia.fr`;
 </div>`;
 
   return { subject, body, mockupHtml };
+}
+
+// =============================================
+// 4. EMAIL RELANCE — Suivi apres premier contact
+// =============================================
+
+export function generateEmailRelance(prospect: ProspectData): { subject: string; body: string } {
+  const name = getCivilite(prospect);
+  const entreprise = prospect.entreprise || '';
+
+  const subject = entreprise
+    ? `${entreprise} — Suite a notre echange`
+    : `Suite a notre echange`;
+
+  const body = `Bonjour ${name},
+
+Je me permets de revenir vers vous suite a notre dernier echange concernant ${entreprise ? `la presence digitale de ${entreprise}` : 'votre projet digital'}.
+
+Je sais que le quotidien peut vite prendre le dessus, mais je voulais m'assurer que vous aviez bien recu toutes les informations et repondre a vos eventuelles questions.
+
+Pour rappel, voici ce que nous avions evoque :
+
+  • Un site web professionnel adapte a votre secteur
+  • Un referencement local optimise (Google)
+  • Un accompagnement personnalise de A a Z
+
+Je reste disponible pour un echange rapide de 10-15 minutes, au moment qui vous arrange le mieux.
+
+N'hesitez pas a me dire quel creneau vous conviendrait.
+
+Bien cordialement,
+
+Adrien Lechevalier
+Co-fondateur — Solayia
+contact@solayia.fr | solayia.fr`;
+
+  return { subject, body };
+}
+
+// =============================================
+// 5. EMAIL PROPOSITION — Envoi de proposition commerciale
+// =============================================
+
+interface ProspectDataExtended extends ProspectData {
+  description_prestation: string | null;
+  tarif_propose: number | null;
+  adresse_chantier: string | null;
+}
+
+export function generateEmailProposition(prospect: ProspectDataExtended): { subject: string; body: string } {
+  const name = getCivilite(prospect);
+  const entreprise = prospect.entreprise || '';
+  const tarif = prospect.tarif_propose
+    ? new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(prospect.tarif_propose)
+    : null;
+
+  const subject = entreprise
+    ? `Proposition commerciale — ${entreprise} x Solayia`
+    : `Votre proposition commerciale Solayia`;
+
+  const body = `Bonjour ${name},
+
+Suite a nos echanges, j'ai le plaisir de vous transmettre notre proposition commerciale pour ${entreprise || 'votre projet'}.
+
+${prospect.description_prestation ? `Prestation proposee :\n${prospect.description_prestation}\n` : ''}${tarif ? `Investissement : ${tarif} HT\n` : ''}
+Vous trouverez ci-joint le detail complet de notre proposition, incluant :
+
+  • Le perimetre de la prestation
+  • Le planning previsionnel
+  • Les conditions et modalites
+
+Cette proposition est valable 30 jours. N'hesitez pas a me contacter si vous avez la moindre question ou si vous souhaitez ajuster certains elements.
+
+Je suis convaincu que cette collaboration sera benefique pour ${entreprise || 'votre activite'} et j'ai hate de demarrer ce projet avec vous.
+
+A tres bientot,
+
+Adrien Lechevalier
+Co-fondateur — Solayia
+contact@solayia.fr | solayia.fr`;
+
+  return { subject, body };
+}
+
+// =============================================
+// 6. EMAIL REMERCIEMENT — Post-RDV
+// =============================================
+
+export function generateEmailRemerciement(prospect: ProspectData): { subject: string; body: string } {
+  const name = getCivilite(prospect);
+  const entreprise = prospect.entreprise || '';
+
+  const subject = entreprise
+    ? `Merci pour cet echange — ${entreprise}`
+    : `Merci pour cet echange`;
+
+  const body = `Bonjour ${name},
+
+Je tenais a vous remercier pour le temps que vous m'avez accorde aujourd'hui. C'etait un plaisir d'en apprendre davantage sur ${entreprise || 'votre activite'} et vos ambitions.
+
+Comme convenu, je vous enverrai rapidement :
+
+  • Une proposition detaillee adaptee a vos besoins
+  • Des exemples de realisations dans votre secteur
+  • Un planning previsionnel pour le projet
+
+En attendant, n'hesitez pas a me contacter si vous avez des questions ou des precisions a apporter.
+
+Je suis enthousiaste a l'idee de collaborer avec vous !
+
+Bien cordialement,
+
+Adrien Lechevalier
+Co-fondateur — Solayia
+contact@solayia.fr | solayia.fr`;
+
+  return { subject, body };
 }
