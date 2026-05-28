@@ -1,24 +1,55 @@
 'use client';
 
-import { useState } from 'react';
-import { Save, Upload, Building2, CreditCard } from 'lucide-react';
-import { mockSettings } from '@/lib/mock-data';
+import { useState, useEffect, useCallback } from 'react';
+import { Save, Upload, Building2, CreditCard, CheckCircle } from 'lucide-react';
+import { getSettings, saveSettings } from './actions';
 
 export default function EntreprisePage() {
-  const getSetting = (key: string) => mockSettings.find((s) => s.key === key)?.value || '';
-
   const [form, setForm] = useState({
-    entreprise_nom: getSetting('entreprise_nom'),
-    entreprise_forme: getSetting('entreprise_forme'),
-    entreprise_capital: getSetting('entreprise_capital'),
-    entreprise_siret: getSetting('entreprise_siret'),
-    entreprise_rcs: getSetting('entreprise_rcs'),
-    entreprise_adresse: getSetting('entreprise_adresse'),
-    entreprise_iban: getSetting('entreprise_iban'),
-    devis_conditions_default: getSetting('devis_conditions_default'),
+    entreprise_nom: '',
+    entreprise_forme: 'SASU',
+    entreprise_capital: '',
+    entreprise_siret: '',
+    entreprise_rcs: '',
+    entreprise_adresse: '',
+    entreprise_iban: '',
+    devis_conditions_default: '',
   });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const loadSettings = useCallback(async () => {
+    const settings = await getSettings();
+    const newForm = { ...form };
+    settings.forEach((s: { key: string; value: string }) => {
+      if (s.key in newForm) {
+        (newForm as Record<string, string>)[s.key] = s.value || '';
+      }
+    });
+    setForm(newForm);
+    setLoading(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => { loadSettings(); }, [loadSettings]);
 
   const update = (key: string, value: string) => setForm({ ...form, [key]: value });
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaved(false);
+    const result = await saveSettings(form);
+    setSaving(false);
+    if (!result.error) {
+      setSaved(true);
+      setTimeout(() => setSaved(false), 3000);
+    }
+  };
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-64"><div className="w-8 h-8 border-4 border-brand-200 border-t-brand-600 rounded-full animate-spin" /></div>;
+  }
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -104,10 +135,20 @@ export default function EntreprisePage() {
       </div>
 
       {/* Save */}
-      <div className="flex justify-end">
-        <button className="btn-primary">
-          <Save className="w-4 h-4" />
-          Enregistrer les modifications
+      <div className="flex items-center justify-end gap-3">
+        {saved && (
+          <span className="text-sm text-green-600 font-medium flex items-center gap-1.5">
+            <CheckCircle className="w-4 h-4" />
+            Enregistre
+          </span>
+        )}
+        <button onClick={handleSave} disabled={saving} className="btn-primary">
+          {saving ? (
+            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          ) : (
+            <Save className="w-4 h-4" />
+          )}
+          {saving ? 'Enregistrement...' : 'Enregistrer les modifications'}
         </button>
       </div>
     </div>

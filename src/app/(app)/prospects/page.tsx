@@ -6,7 +6,6 @@ import ProspectKanban from '@/components/prospects/ProspectKanban';
 import { formatDate, getInitials } from '@/lib/utils';
 import type { ProspectStatut, ProspectTemperature, TypeContact } from '@/lib/types';
 import { PROSPECT_STATUTS, PROSPECT_TEMPERATURES, TYPES_CONTACT, SOURCES_PROSPECT } from '@/lib/types';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { getProspects, getProfiles, createProspect, deleteProspect, updateProspectStatut } from './actions';
 
@@ -29,6 +28,8 @@ export default function ProspectsPage() {
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [formLoading, setFormLoading] = useState(false);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState('');
   const router = useRouter();
 
   const loadData = useCallback(async () => {
@@ -61,6 +62,25 @@ export default function ProspectsPage() {
   const handleStatutChange = async (id: string, statut: ProspectStatut) => {
     await updateProspectStatut(id, statut);
     await loadData();
+  };
+
+  const handleImport = async () => {
+    if (!confirm('Importer les 44 contacts CRM dans Supabase ?')) return;
+    setImporting(true);
+    setImportMsg('');
+    try {
+      const res = await fetch('/api/import-prospects', { method: 'POST' });
+      const data = await res.json();
+      if (data.error) {
+        setImportMsg(`Erreur : ${data.error}`);
+      } else {
+        setImportMsg(data.message);
+        await loadData();
+      }
+    } catch {
+      setImportMsg('Erreur reseau lors de l\'import.');
+    }
+    setImporting(false);
   };
 
   const filtered = prospects.filter((p) => {
@@ -147,11 +167,22 @@ export default function ProspectsPage() {
             <button onClick={() => setView('kanban')} className={`p-2 rounded-md transition-colors ${view === 'kanban' ? 'bg-white shadow-sm text-gray-900' : 'text-gray-500'}`}><LayoutGrid className="w-4 h-4" /></button>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/prospects/import" className="btn-secondary"><Upload className="w-4 h-4" /><span className="hidden sm:inline">Import</span></Link>
+            <button onClick={handleImport} disabled={importing} className="btn-secondary">
+              {importing ? <div className="w-4 h-4 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" /> : <Upload className="w-4 h-4" />}
+              <span className="hidden sm:inline">{importing ? 'Import...' : 'Import CRM'}</span>
+            </button>
             <button onClick={() => setShowForm(true)} className="btn-primary"><Plus className="w-4 h-4" /><span className="hidden sm:inline">Nouveau</span></button>
           </div>
         </div>
       </div>
+
+      {/* Import feedback */}
+      {importMsg && (
+        <div className={`p-3 rounded-lg text-sm font-medium flex items-center justify-between ${importMsg.startsWith('Erreur') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+          {importMsg}
+          <button onClick={() => setImportMsg('')} className="text-xs opacity-60 hover:opacity-100 ml-2">✕</button>
+        </div>
+      )}
 
       {/* Modal creation */}
       {showForm && (
