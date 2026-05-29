@@ -95,14 +95,14 @@ export default function ProposalEditor({ prospectData, onClose }: ProposalEditor
   });
 
   // Conditions
-  const [conditions, setConditions] = useState(`Conditions de reglement :
-- 30% a la signature
-- 40% a la livraison de la maquette validee
-- 30% a la mise en production
+  const [conditions, setConditions] = useState(`Conditions de règlement :
+- 30% à la signature
+- 40% à la livraison de la maquette validée
+- 30% à la mise en production
 
-Delai de realisation : 4 a 6 semaines a compter de la reception de l'acompte.
+Délai de réalisation : 4 à 6 semaines à compter de la réception de l'acompte.
 
-Cette proposition est valable 30 jours a compter de sa date d'emission.`);
+Cette proposition est valable 30 jours à compter de sa date d'émission.`);
 
   const [notes, setNotes] = useState('');
   const [showConditions, setShowConditions] = useState(false);
@@ -273,7 +273,7 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
             className="btn-secondary text-sm"
           >
             {mode === 'edit' ? <Eye className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-            <span className="hidden sm:inline">{mode === 'edit' ? 'Apercu' : 'Editer'}</span>
+            <span className="hidden sm:inline">{mode === 'edit' ? 'Aperçu' : 'Éditer'}</span>
           </button>
           <button onClick={handlePrint} className="btn-primary text-sm">
             <Printer className="w-4 h-4" />
@@ -294,11 +294,11 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Numero</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Numéro</label>
                   <input value={numero} onChange={(e) => setNumero(e.target.value)} className="input-field font-mono" />
                 </div>
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Date d&apos;emission</label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date d&apos;émission</label>
                   <input type="date" value={dateEmission} onChange={(e) => setDateEmission(e.target.value)} className="input-field" />
                 </div>
                 <div>
@@ -351,19 +351,19 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
                         <input
                           value={ligne.designation}
                           onChange={(e) => updateLigne(ligne.id, 'designation', e.target.value)}
-                          placeholder="Designation (ex: Creation site web vitrine)"
+                          placeholder="Désignation (ex: Création site web vitrine)"
                           className="input-field font-medium"
                         />
                         <textarea
                           value={ligne.description}
                           onChange={(e) => updateLigne(ligne.id, 'description', e.target.value)}
-                          placeholder="Description detaillee (optionnel)"
+                          placeholder="Description détaillée (optionnel)"
                           rows={2}
                           className="input-field text-sm"
                         />
                         <div className="grid grid-cols-3 gap-3">
                           <div>
-                            <label className="block text-[10px] font-medium text-gray-500 mb-0.5">Quantite</label>
+                            <label className="block text-[10px] font-medium text-gray-500 mb-0.5">Quantité</label>
                             <input
                               type="number" min="1" step="1"
                               value={ligne.quantite}
@@ -434,11 +434,11 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
               {showConditions && (
                 <div className="mt-4 space-y-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Conditions de reglement</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Conditions de règlement</label>
                     <textarea value={conditions} onChange={(e) => setConditions(e.target.value)} rows={6} className="input-field text-sm" />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-600 mb-1">Notes supplementaires</label>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Notes supplémentaires</label>
                     <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-field text-sm" placeholder="Notes internes ou remarques pour le client..." />
                   </div>
                 </div>
@@ -464,7 +464,7 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
                     </div>
                     <div style={{ textAlign: 'right' as const }}>
                       <div style={{ marginBottom: '2mm' }}>
-                        <div style={{ fontSize: '7pt', color: '#94A3B8', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Reference</div>
+                        <div style={{ fontSize: '7pt', color: '#94A3B8', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Référence</div>
                         <div style={{ fontSize: '9pt', color: '#0A1A3A', fontWeight: 600 }}>{numero}</div>
                       </div>
                       <div style={{ marginBottom: '2mm' }}>
@@ -472,7 +472,7 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
                         <div style={{ fontSize: '9pt', color: '#0A1A3A', fontWeight: 600 }}>{formatDate(dateEmission)}</div>
                       </div>
                       <div>
-                        <div style={{ fontSize: '7pt', color: '#94A3B8', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Validite</div>
+                        <div style={{ fontSize: '7pt', color: '#94A3B8', textTransform: 'uppercase' as const, letterSpacing: '0.1em' }}>Validité</div>
                         <div style={{ fontSize: '9pt', color: '#0A1A3A', fontWeight: 600 }}>{formatDate(dateValidite)}</div>
                       </div>
                     </div>
@@ -487,7 +487,7 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
                   {/* Addresses */}
                   <div style={{ display: 'flex', gap: '6mm', marginBottom: '6mm' }}>
                     <div style={{ flex: 1, background: '#F8FAFC', border: '1px solid #E2E8F0', borderRadius: '2mm', padding: '4mm' }}>
-                      <div style={{ fontSize: '7pt', color: '#D4A84B', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.1em', marginBottom: '2mm' }}>Emetteur</div>
+                      <div style={{ fontSize: '7pt', color: '#D4A84B', fontWeight: 700, textTransform: 'uppercase' as const, letterSpacing: '0.1em', marginBottom: '2mm' }}>Émetteur</div>
                       <div style={{ fontSize: '10pt', fontWeight: 700, color: '#0A1A3A' }}>Solayia</div>
                       <div style={{ fontSize: '8pt', color: '#64748B', lineHeight: 1.5 }}>
                         SASU au capital de 1 000 EUR<br />
@@ -511,8 +511,8 @@ Cette proposition est valable 30 jours a compter de sa date d'emission.`);
                   <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '8.5pt', marginBottom: '6mm' }}>
                     <thead>
                       <tr>
-                        <th style={{ background: '#0A1A3A', color: '#fff', padding: '3mm', textAlign: 'left' as const, fontWeight: 600, fontSize: '7pt', textTransform: 'uppercase' as const, letterSpacing: '0.05em', borderRadius: '2mm 0 0 0' }}>Designation</th>
-                        <th style={{ background: '#0A1A3A', color: '#fff', padding: '3mm', textAlign: 'right' as const, fontWeight: 600, fontSize: '7pt', textTransform: 'uppercase' as const, width: '15mm' }}>Qte</th>
+                        <th style={{ background: '#0A1A3A', color: '#fff', padding: '3mm', textAlign: 'left' as const, fontWeight: 600, fontSize: '7pt', textTransform: 'uppercase' as const, letterSpacing: '0.05em', borderRadius: '2mm 0 0 0' }}>Désignation</th>
+                        <th style={{ background: '#0A1A3A', color: '#fff', padding: '3mm', textAlign: 'right' as const, fontWeight: 600, fontSize: '7pt', textTransform: 'uppercase' as const, width: '15mm' }}>Qté</th>
                         <th style={{ background: '#0A1A3A', color: '#fff', padding: '3mm', textAlign: 'right' as const, fontWeight: 600, fontSize: '7pt', textTransform: 'uppercase' as const, width: '25mm' }}>P.U. HT</th>
                         <th style={{ background: '#0A1A3A', color: '#fff', padding: '3mm', textAlign: 'right' as const, fontWeight: 600, fontSize: '7pt', textTransform: 'uppercase' as const, letterSpacing: '0.05em', borderRadius: '0 2mm 0 0', width: '25mm' }}>Total HT</th>
                       </tr>

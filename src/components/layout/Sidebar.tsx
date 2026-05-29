@@ -20,7 +20,7 @@ const commercialNav = [
 ];
 
 const settingsNav = [
-  { href: '/parametres/equipe', label: 'Equipe', icon: UsersRound },
+  { href: '/parametres/equipe', label: 'Équipe', icon: UsersRound },
   { href: '/parametres/entreprise', label: 'Entreprise', icon: Building2 },
 ];
 
@@ -106,9 +106,9 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onMobileClose
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-6 overflow-y-auto">
-        <NavSection label="General" items={mainNav} />
+        <NavSection label="Général" items={mainNav} />
         <NavSection label="Commercial" items={commercialNav} />
-        <NavSection label="Parametres" items={settingsNav} />
+        <NavSection label="Paramètres" items={settingsNav} />
       </nav>
 
       {/* User */}

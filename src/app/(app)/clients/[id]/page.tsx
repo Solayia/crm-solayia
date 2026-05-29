@@ -73,7 +73,7 @@ export default function ClientDetailPage() {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Supprimer le client "${entreprise}" et tous ses projets ? Cette action est irreversible.`)) return;
+    if (!confirm(`Supprimer le client "${entreprise}" et tous ses projets ? Cette action est irréversible.`)) return;
     const result = await deleteClientAction(clientId);
     if (!result.error) {
       router.push('/clients');
@@ -147,7 +147,7 @@ export default function ClientDetailPage() {
           </button>
           <button onClick={handleSave} disabled={saving} className="btn-primary">
             <Save className="w-4 h-4" />
-            <span className="hidden sm:inline">{saving ? 'Enregistrement...' : saved ? 'Enregistre !' : 'Enregistrer'}</span>
+            <span className="hidden sm:inline">{saving ? 'Enregistrement...' : saved ? 'Enregistré !' : 'Enregistrer'}</span>
             <span className="sm:hidden">{saving ? '...' : saved ? '✓' : 'Sauver'}</span>
           </button>
         </div>
@@ -166,7 +166,7 @@ export default function ClientDetailPage() {
               <input value={nom} onChange={(e) => setNom(e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Prenom</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Prénom</label>
               <input value={prenom} onChange={(e) => setPrenom(e.target.value)} className="input-field" />
             </div>
           </div>
@@ -183,7 +183,7 @@ export default function ClientDetailPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
-                <Phone className="w-3 h-3" /> Telephone
+                <Phone className="w-3 h-3" /> Téléphone
               </label>
               <input value={telephone} onChange={(e) => setTelephone(e.target.value)} className="input-field" />
             </div>
@@ -286,11 +286,11 @@ export default function ClientDetailPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date debut</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date début</label>
                   <input name="date_debut" type="date" defaultValue={editProjet?.date_debut || ''} className="input-field" />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Date fin prevue</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Date fin prévue</label>
                   <input name="date_fin_prevue" type="date" defaultValue={editProjet?.date_fin_prevue || ''} className="input-field" />
                 </div>
               </div>
@@ -307,7 +307,7 @@ export default function ClientDetailPage() {
                 <div className="flex-1" />
                 <button type="button" onClick={() => { setEditProjet(null); setShowNewProjet(false); }} className="btn-secondary flex-1 sm:flex-none">Annuler</button>
                 <button type="submit" disabled={projetLoading} className="btn-primary flex-1 sm:flex-none">
-                  {projetLoading ? 'Enregistrement...' : editProjet?.id ? 'Modifier' : 'Creer'}
+                  {projetLoading ? 'Enregistrement...' : editProjet?.id ? 'Modifier' : 'Créer'}
                 </button>
               </div>
             </form>

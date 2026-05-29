@@ -22,8 +22,8 @@ export default function RecentActivity({ interactions, limit = 6 }: RecentActivi
     return (
       <div className="card">
         <div className="px-5 py-4 border-b border-gray-100">
-          <h3 className="text-sm font-semibold text-gray-900">Activite recente</h3>
-          <p className="text-xs text-gray-500 mt-0.5">Dernieres interactions</p>
+          <h3 className="text-sm font-semibold text-gray-900">Activité récente</h3>
+          <p className="text-xs text-gray-500 mt-0.5">Dernières interactions</p>
         </div>
         <div className="px-5 py-8 text-center text-sm text-gray-400">
           Aucune interaction pour le moment
@@ -35,8 +35,8 @@ export default function RecentActivity({ interactions, limit = 6 }: RecentActivi
   return (
     <div className="card">
       <div className="px-5 py-4 border-b border-gray-100">
-        <h3 className="text-sm font-semibold text-gray-900">Activite recente</h3>
-        <p className="text-xs text-gray-500 mt-0.5">Dernieres interactions</p>
+        <h3 className="text-sm font-semibold text-gray-900">Activité récente</h3>
+        <p className="text-xs text-gray-500 mt-0.5">Dernières interactions</p>
       </div>
       <div className="divide-y divide-gray-50">
         {sorted.map((interaction) => {

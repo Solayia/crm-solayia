@@ -12,11 +12,11 @@ import { convertToClient, updateProspectChecklist, updateMotifPerte } from '@/ap
 // --- SCORING ---
 
 const CHECKLIST_ITEMS = [
-  { key: 'budget_confirme', label: 'Budget confirme', emoji: '💰' },
-  { key: 'decideur_identifie', label: 'Decideur identifie', emoji: '👤' },
-  { key: 'besoin_valide', label: 'Besoin valide', emoji: '✅' },
+  { key: 'budget_confirme', label: 'Budget confirmé', emoji: '💰' },
+  { key: 'decideur_identifie', label: 'Décideur identifié', emoji: '👤' },
+  { key: 'besoin_valide', label: 'Besoin validé', emoji: '✅' },
   { key: 'timing_ok', label: 'Timing OK', emoji: '⏰' },
-  { key: 'concurrence_identifiee', label: 'Concurrence identifiee', emoji: '🔍' },
+  { key: 'concurrence_identifiee', label: 'Concurrence identifiée', emoji: '🔍' },
 ];
 
 const MOTIFS_PERTE = [
@@ -24,17 +24,17 @@ const MOTIFS_PERTE = [
   { value: 'concurrent', label: 'Choisi un concurrent', emoji: '🏃' },
   { value: 'pas_de_besoin', label: 'Pas de besoin', emoji: '🚫' },
   { value: 'timing', label: 'Mauvais timing', emoji: '⏳' },
-  { value: 'pas_de_reponse', label: 'Pas de reponse', emoji: '📵' },
+  { value: 'pas_de_reponse', label: 'Pas de réponse', emoji: '📵' },
   { value: 'budget_insuffisant', label: 'Budget insuffisant', emoji: '💰' },
-  { value: 'projet_reporte', label: 'Projet reporte', emoji: '📅' },
+  { value: 'projet_reporte', label: 'Projet reporté', emoji: '📅' },
   { value: 'autre', label: 'Autre', emoji: '❓' },
 ];
 
 const RELANCE_SEQUENCES = [
-  { jour: 3, label: 'J+3', type: 'relance_douce', description: 'Relance douce — verifier la reception' },
+  { jour: 3, label: 'J+3', type: 'relance_douce', description: 'Relance douce — vérifier la réception' },
   { jour: 7, label: 'J+7', type: 'relance_valeur', description: 'Relance de valeur — partager un cas client' },
-  { jour: 15, label: 'J+15', type: 'relance_decision', description: 'Relance decision — deadline approche' },
-  { jour: 30, label: 'J+30', type: 'relance_finale', description: 'Derniere relance — maintenant ou jamais' },
+  { jour: 15, label: 'J+15', type: 'relance_decision', description: 'Relance décision — deadline approche' },
+  { jour: 30, label: 'J+30', type: 'relance_finale', description: 'Dernière relance — maintenant ou jamais' },
 ];
 
 interface ProspectToolboxProps {
@@ -51,7 +51,7 @@ function calculateScore(prospect: Prospect, interactions: Interaction[]): {
 
   // Temperature (max 30)
   const tempScore = prospect.temperature === 'chaud' ? 30 : prospect.temperature === 'tiede' ? 15 : 0;
-  details.push({ label: 'Temperature', points: tempScore, max: 30 });
+  details.push({ label: 'Température', points: tempScore, max: 30 });
 
   // Interactions (max 20, +5 par interaction)
   const interScore = Math.min(interactions.length * 5, 20);
@@ -61,7 +61,7 @@ function calculateScore(prospect: Prospect, interactions: Interaction[]): {
   let contactScore = 0;
   if (prospect.email) contactScore += 5;
   if (prospect.telephone) contactScore += 5;
-  details.push({ label: 'Coordonnees', points: contactScore, max: 10 });
+  details.push({ label: 'Coordonnées', points: contactScore, max: 10 });
 
   // Prestation (max 15)
   let prestaScore = 0;
@@ -266,7 +266,7 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
           <div className="card p-5">
             <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
               <CalendarClock className="w-4 h-4 text-brand-600" />
-              Sequences de relance
+              Séquences de relance
             </h3>
             <div className="relative">
               {/* Timeline line */}
@@ -337,7 +337,7 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
               </div>
               <div className="text-left">
                 <p className="text-sm font-bold">Convertir en client</p>
-                <p className="text-[11px] text-green-600">Creer le client et demarrer le projet</p>
+                <p className="text-[11px] text-green-600">Créer le client et démarrer le projet</p>
               </div>
             </button>
 
@@ -357,7 +357,7 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
           </div>
         )}
 
-        {/* --- MOTIF DE PERTE DISPLAY (si deja perdu) --- */}
+        {/* --- MOTIF DE PERTE DISPLAY (si déjà perdu) --- */}
         {prospect.statut === 'perdu' && prospect.motif_perte && (
           <div className="card p-5 border-red-200 bg-red-50">
             <h3 className="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">
@@ -399,7 +399,7 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
               <div className="space-y-1.5">
                 <div className="flex items-center gap-2 text-sm text-gray-700">
                   <CheckSquare className="w-4 h-4 text-green-500" />
-                  Creer une fiche client avec les infos du prospect
+                  Créer une fiche client avec les infos du prospect
                 </div>
                 <div className="flex items-center gap-2 text-sm text-gray-700">
                   <CheckSquare className="w-4 h-4 text-green-500" />
@@ -465,12 +465,12 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
 
             {motifPerte === 'autre' && (
               <div className="mb-4">
-                <label className="block text-xs font-medium text-gray-600 mb-1">Preciser le motif</label>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Préciser le motif</label>
                 <input
                   value={motifPerteCustom}
                   onChange={(e) => setMotifPerteCustom(e.target.value)}
                   className="input-field"
-                  placeholder="Decrire le motif..."
+                  placeholder="Décrire le motif..."
                 />
               </div>
             )}

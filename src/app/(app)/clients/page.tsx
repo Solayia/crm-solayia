@@ -103,7 +103,7 @@ export default function ClientsPage() {
           </div>
           <div className="min-w-0">
             <p className="text-lg sm:text-2xl font-bold text-gray-900 truncate">{formatCurrency(mrrTotal * 12)}</p>
-            <p className="text-[10px] sm:text-xs text-gray-500">ARR estime</p>
+            <p className="text-[10px] sm:text-xs text-gray-500">ARR estimé</p>
           </div>
         </div>
       </div>
@@ -147,18 +147,18 @@ export default function ClientsPage() {
             <form onSubmit={handleCreate} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Nom *</label><input name="nom" required className="input-field" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Prenom</label><input name="prenom" className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label><input name="prenom" className="input-field" /></div>
               </div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Entreprise *</label><input name="entreprise" required className="input-field" /></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input name="email" type="email" className="input-field" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label><input name="telephone" className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label><input name="telephone" className="input-field" /></div>
               </div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">MRR (EUR/mois)</label><input name="mrr" type="number" step="0.01" defaultValue="0" className="input-field" /></div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Notes</label><textarea name="notes" rows={2} className="input-field" /></div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 sm:flex-none">Annuler</button>
-                <button type="submit" disabled={formLoading} className="btn-primary flex-1 sm:flex-none">{formLoading ? 'Creation...' : 'Creer'}</button>
+                <button type="submit" disabled={formLoading} className="btn-primary flex-1 sm:flex-none">{formLoading ? 'Création...' : 'Créer'}</button>
               </div>
             </form>
           </div>
@@ -211,7 +211,7 @@ export default function ClientsPage() {
                       <tr className="border-b border-gray-100">
                         <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Client</th>
                         <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Contact</th>
-                        <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Telephone</th>
+                        <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Téléphone</th>
                         <th className="text-right text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">MRR</th>
                         <th className="text-left text-xs font-semibold text-gray-500 uppercase tracking-wider px-4 py-3">Depuis</th>
                       </tr>

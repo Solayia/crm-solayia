@@ -78,7 +78,7 @@ export default function ProspectsPage() {
         await loadData();
       }
     } catch {
-      setImportMsg('Erreur reseau lors de l\'import.');
+      setImportMsg('Erreur réseau lors de l\'import.');
     }
     setImporting(false);
   };
@@ -118,7 +118,7 @@ export default function ProspectsPage() {
         </button>
         <button onClick={() => setFilterTemp(filterTemp === 'tiede' ? '' : 'tiede')} className={`card p-3 text-left transition-all ${filterTemp === 'tiede' ? 'ring-2 ring-amber-400' : ''}`}>
           <div className="flex items-center justify-between mb-1">
-            <span className="text-xs font-medium text-gray-500">Tiedes</span>
+            <span className="text-xs font-medium text-gray-500">Tièdes</span>
             <Sun className="w-4 h-4 text-amber-500" />
           </div>
           <p className="text-2xl font-bold text-gray-900">{countTiede}</p>
@@ -147,7 +147,7 @@ export default function ProspectsPage() {
             <input type="text" placeholder="Rechercher par nom, entreprise, email..." value={search} onChange={(e) => setSearch(e.target.value)} className="input-field pl-9" />
           </div>
           <select value={filterStatut} onChange={(e) => setFilterStatut(e.target.value as ProspectStatut | '')} className="input-field w-auto shrink-0 text-sm">
-            <option value="">Toutes etapes</option>
+            <option value="">Toutes étapes</option>
             {PROSPECT_STATUTS.filter(s => ['prospect','prise_contact','r1','r2','proposition','acompte','perdu'].includes(s.value)).map((s) => (
               <option key={s.value} value={s.value}>{s.emoji} {s.label}</option>
             ))}
@@ -194,16 +194,16 @@ export default function ProspectsPage() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Nom</label><input name="nom" className="input-field" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Prenom</label><input name="prenom" className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Prénom</label><input name="prenom" className="input-field" /></div>
               </div>
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Entreprise</label><input name="entreprise" className="input-field" /></div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div><label className="block text-sm font-medium text-gray-700 mb-1">Email</label><input name="email" type="email" className="input-field" /></div>
-                <div><label className="block text-sm font-medium text-gray-700 mb-1">Telephone</label><input name="telephone" className="input-field" /></div>
+                <div><label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label><input name="telephone" className="input-field" /></div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Temperature</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Température</label>
                   <select name="temperature" className="input-field">
                     {PROSPECT_TEMPERATURES.map((t) => (<option key={t.value} value={t.value}>{t.emoji} {t.label}</option>))}
                   </select>
@@ -216,7 +216,7 @@ export default function ProspectsPage() {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Assigne a</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Assigné à</label>
                   <select name="assigned_to" className="input-field">
                     <option value="">—</option>
                     {profiles.map((pr) => (<option key={pr.id} value={pr.id}>{pr.full_name}</option>))}
@@ -226,7 +226,7 @@ export default function ProspectsPage() {
               <div><label className="block text-sm font-medium text-gray-700 mb-1">Notes</label><textarea name="notes" rows={2} className="input-field" /></div>
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowForm(false)} className="btn-secondary flex-1 sm:flex-none">Annuler</button>
-                <button type="submit" disabled={formLoading} className="btn-primary flex-1 sm:flex-none">{formLoading ? 'Creation...' : 'Creer'}</button>
+                <button type="submit" disabled={formLoading} className="btn-primary flex-1 sm:flex-none">{formLoading ? 'Création...' : 'Créer'}</button>
               </div>
             </form>
           </div>
@@ -290,9 +290,9 @@ export default function ProspectsPage() {
                   <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Nom / Entreprise</th>
                   <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Contact</th>
                   <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Temp.</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Etape</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Étape</th>
                   <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Source</th>
-                  <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Assigne</th>
+                  <th className="text-left text-xs font-semibold text-gray-500 uppercase px-4 py-3">Assigné</th>
                   <th className="px-4 py-3"></th>
                 </tr></thead>
                 <tbody className="divide-y divide-gray-50">

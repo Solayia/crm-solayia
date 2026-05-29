@@ -27,19 +27,19 @@ export const PROSPECT_STATUTS: { value: ProspectStatut; label: string; color: st
   { value: 'brief', label: 'Brief', color: 'bg-fuchsia-100 text-fuchsia-700', emoji: '📝' },
   { value: 'maquette', label: 'Maquette', color: 'bg-pink-100 text-pink-700', emoji: '🎨' },
   { value: 'validation_maquette', label: 'Valid. maquette', color: 'bg-rose-100 text-rose-700', emoji: '✅' },
-  { value: 'pre_prod', label: 'Pre-prod', color: 'bg-amber-100 text-amber-700', emoji: '🔧' },
-  { value: 'validation_pre_prod', label: 'Valid. pre-prod', color: 'bg-orange-100 text-orange-700', emoji: '👁️' },
+  { value: 'pre_prod', label: 'Pré-prod', color: 'bg-amber-100 text-amber-700', emoji: '🔧' },
+  { value: 'validation_pre_prod', label: 'Valid. pré-prod', color: 'bg-orange-100 text-orange-700', emoji: '👁️' },
   { value: 'production', label: 'Production', color: 'bg-emerald-100 text-emerald-700', emoji: '🚀' },
   { value: 'suivi', label: 'Suivi', color: 'bg-green-100 text-green-700', emoji: '🏁' },
   { value: 'perdu', label: 'Perdu', color: 'bg-red-100 text-red-700', emoji: '❌' },
 ];
 
-// Etapes avant signature (pipeline commercial)
+// Étapes avant signature (pipeline commercial)
 export const PIPELINE_COMMERCIAL = PROSPECT_STATUTS.filter(
   s => ['prospect', 'prise_contact', 'r1', 'r2', 'proposition', 'acompte'].includes(s.value)
 );
 
-// Etapes apres signature (gestion de projet/chantier)
+// Étapes après signature (gestion de projet/chantier)
 export const PIPELINE_PROJET = PROSPECT_STATUTS.filter(
   s => ['brief', 'maquette', 'validation_maquette', 'pre_prod', 'validation_pre_prod', 'production', 'suivi'].includes(s.value)
 );
@@ -52,12 +52,12 @@ export const TYPES_CONTACT: { value: TypeContact; label: string; color: string; 
   { value: 'prescripteur', label: 'Prescripteur', color: 'bg-teal-100 text-teal-700', emoji: '🤝' },
 ];
 
-// Temperature du prospect
+// Température du prospect
 export type ProspectTemperature = 'chaud' | 'tiede' | 'froid';
 
 export const PROSPECT_TEMPERATURES: { value: ProspectTemperature; label: string; color: string; emoji: string }[] = [
   { value: 'chaud', label: 'Chaud', color: 'bg-red-100 text-red-700', emoji: '🔥' },
-  { value: 'tiede', label: 'Tiede', color: 'bg-amber-100 text-amber-700', emoji: '🌤️' },
+  { value: 'tiede', label: 'Tiède', color: 'bg-amber-100 text-amber-700', emoji: '🌤️' },
   { value: 'froid', label: 'Froid', color: 'bg-blue-100 text-blue-700', emoji: '❄️' },
 ];
 
@@ -65,20 +65,20 @@ export type DevisStatut = 'brouillon' | 'envoye' | 'accepte' | 'refuse' | 'expir
 
 export const DEVIS_STATUTS: { value: DevisStatut; label: string; color: string }[] = [
   { value: 'brouillon', label: 'Brouillon', color: 'bg-gray-100 text-gray-700' },
-  { value: 'envoye', label: 'Envoye', color: 'bg-blue-100 text-blue-700' },
-  { value: 'accepte', label: 'Accepte', color: 'bg-green-100 text-green-700' },
-  { value: 'refuse', label: 'Refuse', color: 'bg-red-100 text-red-700' },
-  { value: 'expire', label: 'Expire', color: 'bg-amber-100 text-amber-700' },
+  { value: 'envoye', label: 'Envoyé', color: 'bg-blue-100 text-blue-700' },
+  { value: 'accepte', label: 'Accepté', color: 'bg-green-100 text-green-700' },
+  { value: 'refuse', label: 'Refusé', color: 'bg-red-100 text-red-700' },
+  { value: 'expire', label: 'Expiré', color: 'bg-amber-100 text-amber-700' },
 ];
 
 export type ProjetStatut = 'en_preparation' | 'en_cours' | 'en_pause' | 'termine' | 'annule';
 
 export const PROJET_STATUTS: { value: ProjetStatut; label: string; color: string }[] = [
-  { value: 'en_preparation', label: 'En preparation', color: 'bg-gray-100 text-gray-700' },
+  { value: 'en_preparation', label: 'En préparation', color: 'bg-gray-100 text-gray-700' },
   { value: 'en_cours', label: 'En cours', color: 'bg-blue-100 text-blue-700' },
   { value: 'en_pause', label: 'En pause', color: 'bg-amber-100 text-amber-700' },
-  { value: 'termine', label: 'Termine', color: 'bg-green-100 text-green-700' },
-  { value: 'annule', label: 'Annule', color: 'bg-red-100 text-red-700' },
+  { value: 'termine', label: 'Terminé', color: 'bg-green-100 text-green-700' },
+  { value: 'annule', label: 'Annulé', color: 'bg-red-100 text-red-700' },
 ];
 
 export type InteractionType = 'appel' | 'email' | 'rdv' | 'note';
@@ -105,14 +105,14 @@ export const PROSPECT_URGENCES: { value: ProspectUrgence; label: string; color: 
 ];
 
 export const TYPES_PRESTATION = [
-  'Creation site web',
+  'Création site web',
   'Refonte site web',
   'Maintenance web',
-  'SEO / Referencement',
+  'SEO / Référencement',
   'Application web',
   'E-commerce',
   'Climatisation',
-  'Electricite',
+  'Électricité',
   'Plomberie',
   'Multi-services',
   'Autre',
@@ -127,11 +127,11 @@ export const SOURCES_PROSPECT = [
   'Spontanée',
   'Site web',
   'Google Ads',
-  'Bouche a oreille',
+  'Bouche à oreille',
   'Salon professionnel',
-  'Reseaux sociaux',
+  'Réseaux sociaux',
   'Prospection terrain',
-  'Demarchage telephone',
+  'Démarchage téléphone',
   'Autre',
 ];
 

@@ -75,7 +75,7 @@ export default function EntreprisePage() {
 
       {/* Infos entreprise */}
       <div className="card p-5">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">Informations legales</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">Informations légales</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5">Nom de l&apos;entreprise</label>
@@ -105,8 +105,8 @@ export default function EntreprisePage() {
             <input type="text" value={form.entreprise_rcs} onChange={(e) => update('entreprise_rcs', e.target.value)} className="input-field" placeholder="RCS Toulouse" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Adresse du siege</label>
-            <input type="text" value={form.entreprise_adresse} onChange={(e) => update('entreprise_adresse', e.target.value)} className="input-field" placeholder="Adresse complete" />
+            <label className="block text-sm font-medium text-gray-700 mb-1.5">Adresse du siège</label>
+            <input type="text" value={form.entreprise_adresse} onChange={(e) => update('entreprise_adresse', e.target.value)} className="input-field" placeholder="Adresse complète" />
           </div>
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function EntreprisePage() {
       <div className="card p-5">
         <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <CreditCard className="w-4 h-4 text-gray-400" />
-          Coordonnees bancaires
+          Coordonnées bancaires
         </h3>
         <div className="grid grid-cols-1 gap-4">
           <div>
@@ -127,9 +127,9 @@ export default function EntreprisePage() {
 
       {/* Devis defaults */}
       <div className="card p-5">
-        <h3 className="text-sm font-semibold text-gray-900 mb-4">Parametres des devis</h3>
+        <h3 className="text-sm font-semibold text-gray-900 mb-4">Paramètres des devis</h3>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Conditions de reglement par defaut</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1.5">Conditions de règlement par défaut</label>
           <input type="text" value={form.devis_conditions_default} onChange={(e) => update('devis_conditions_default', e.target.value)} className="input-field" />
         </div>
       </div>
@@ -139,7 +139,7 @@ export default function EntreprisePage() {
         {saved && (
           <span className="text-sm text-green-600 font-medium flex items-center gap-1.5">
             <CheckCircle className="w-4 h-4" />
-            Enregistre
+            Enregistré
           </span>
         )}
         <button onClick={handleSave} disabled={saving} className="btn-primary">

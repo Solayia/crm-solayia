@@ -411,7 +411,7 @@ export default function ProspectDetailPage() {
               <input value={nom} onChange={(e) => setNom(e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Prenom</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Prénom</label>
               <input value={prenom} onChange={(e) => setPrenom(e.target.value)} className="input-field" />
             </div>
           </div>
@@ -425,13 +425,13 @@ export default function ProspectDetailPage() {
               <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className="input-field" />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> Telephone</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Phone className="w-3 h-3" /> Téléphone</label>
               <input value={telephone} onChange={(e) => setTelephone(e.target.value)} className="input-field" />
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Etape pipeline</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Étape pipeline</label>
               <select value={statut} onChange={(e) => setStatut(e.target.value as ProspectStatut)} className="input-field">
                 <optgroup label="Pipeline commercial">
                   {PIPELINE_COMMERCIAL.map((s) => (<option key={s.value} value={s.value}>{s.emoji} {s.label}</option>))}
@@ -450,7 +450,7 @@ export default function ProspectDetailPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Assigne a</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Assigné à</label>
               <select value={assignedTo} onChange={(e) => setAssignedTo(e.target.value)} className="input-field">
                 <option value="">—</option>
                 {profiles.map((pr) => (<option key={pr.id} value={pr.id}>{pr.full_name}</option>))}
@@ -477,7 +477,7 @@ export default function ProspectDetailPage() {
         <div className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Activite / Metier</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Activité / Métier</label>
               <input value={activite} onChange={(e) => setActivite(e.target.value)} className="input-field" placeholder="Ex: Climatisation, Boulangerie..." />
             </div>
             <div>
@@ -497,7 +497,7 @@ export default function ProspectDetailPage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Canaux privilegies</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Canaux privilégiés</label>
               <input value={canauxPrivilegies} onChange={(e) => setCanauxPrivilegies(e.target.value)} className="input-field" placeholder="Email, SMS, Physique, Visio..." />
             </div>
             <div>
@@ -534,7 +534,7 @@ export default function ProspectDetailPage() {
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><FolderOpen className="w-3 h-3" /> Drive dedie</label>
+              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><FolderOpen className="w-3 h-3" /> Drive dédié</label>
               <div className="flex gap-1">
                 <input value={driveDedie} onChange={(e) => setDriveDedie(e.target.value)} className="input-field flex-1" placeholder="https://drive.google.com/..." />
                 {driveDedie && <a href={driveDedie} target="_blank" rel="noopener noreferrer" className="p-2 text-brand-600 hover:bg-brand-50 rounded-lg shrink-0"><ExternalLink className="w-4 h-4" /></a>}
@@ -542,16 +542,16 @@ export default function ProspectDetailPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Prescripteur(s) referent(s)</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Prescripteur(s) référent(s)</label>
             <input value={prescripteurRef} onChange={(e) => setPrescripteurRef(e.target.value)} className="input-field" placeholder="Nom du prescripteur" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Heart className="w-3 h-3" /> Traits de personnalite</label>
+            <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1"><Heart className="w-3 h-3" /> Traits de personnalité</label>
             <textarea value={traitsPersonnalite} onChange={(e) => setTraitsPersonnalite(e.target.value)} rows={2} className="input-field" placeholder="Douce, exigeante, sympathique..." />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Fichiers & Medias</label>
-            <input value={fichiersMedias} onChange={(e) => setFichiersMedias(e.target.value)} className="input-field" placeholder="Liens vers fichiers, presentations..." />
+            <label className="block text-xs font-medium text-gray-600 mb-1">Fichiers & Médias</label>
+            <input value={fichiersMedias} onChange={(e) => setFichiersMedias(e.target.value)} className="input-field" placeholder="Liens vers fichiers, présentations..." />
           </div>
         </div>
       </div>
@@ -573,20 +573,20 @@ export default function ProspectDetailPage() {
             </div>
             <div>
               <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
-                <Euro className="w-3 h-3" /> Tarif propose (EUR)
+                <Euro className="w-3 h-3" /> Tarif proposé (EUR)
               </label>
               <input type="number" step="0.01" value={tarifPropose} onChange={(e) => setTarifPropose(e.target.value)} className="input-field" placeholder="0.00" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Description de la prestation</label>
-            <textarea value={descriptionPrestation} onChange={(e) => setDescriptionPrestation(e.target.value)} rows={3} className="input-field" placeholder="Detail de la prestation souhaitee ou proposee..." />
+            <textarea value={descriptionPrestation} onChange={(e) => setDescriptionPrestation(e.target.value)} rows={3} className="input-field" placeholder="Détail de la prestation souhaitée ou proposée..." />
           </div>
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
               <MapPin className="w-3 h-3" /> Adresse du chantier / intervention
             </label>
-            <input value={adresseChantier} onChange={(e) => setAdresseChantier(e.target.value)} className="input-field" placeholder="Adresse complete" />
+            <input value={adresseChantier} onChange={(e) => setAdresseChantier(e.target.value)} className="input-field" placeholder="Adresse complète" />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
