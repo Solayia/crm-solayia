@@ -135,51 +135,17 @@ export function generateEmailFlyer(prospect: ProspectData): { subject: string; b
   const services = getServicesSuggeres(secteur);
   const accroche = getAccrocheSecteur(secteur);
 
-  // Prestations adaptees au secteur (grille 2x4 comme le vrai flyer)
-  const prestationsSecteur: Record<string, { icon: string; titre: string; desc: string }[]> = {
-    restauration: [
-      { icon: '🌐', titre: 'Site vitrine', desc: 'Carte, photos, ambiance' },
-      { icon: '📅', titre: 'Reservation en ligne', desc: 'Reservations 24h/24' },
-      { icon: '🔍', titre: 'SEO local', desc: 'N°1 sur Google Maps' },
-      { icon: '📸', titre: 'Photos pro', desc: 'Vos plats en valeur' },
-      { icon: '⭐', titre: 'Avis Google', desc: 'Gestion & reponses' },
-      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Instagram & Facebook' },
-      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
-      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
-    ],
-    btp: [
-      { icon: '🌐', titre: 'Site professionnel', desc: 'Credibilite & confiance' },
-      { icon: '🏗️', titre: 'Portfolio projets', desc: 'Vos realisations en vitrine' },
-      { icon: '🔍', titre: 'SEO local', desc: 'Visible dans votre zone' },
-      { icon: '📋', titre: 'Devis en ligne', desc: 'Formulaire automatise' },
-      { icon: '⭐', titre: 'Avis clients', desc: 'Temoignages & confiance' },
-      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Avant/apres chantiers' },
-      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
-      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
-    ],
-    immobilier: [
-      { icon: '🌐', titre: 'Site immobilier', desc: 'Catalogue de biens' },
-      { icon: '🏠', titre: 'Estimation en ligne', desc: 'Captation de mandats' },
-      { icon: '🔍', titre: 'SEO local', desc: 'Visible sur Google' },
-      { icon: '📸', titre: 'Visuels premium', desc: 'Photos & visites 3D' },
-      { icon: '⭐', titre: 'Avis clients', desc: 'Reputation en ligne' },
-      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Biens & temoignages' },
-      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
-      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
-    ],
-    general: [
-      { icon: '🌐', titre: 'Creation de site web', desc: 'Vitrine professionnelle' },
-      { icon: '🔄', titre: 'Refonte de site', desc: 'Modernisation complete' },
-      { icon: '🛠️', titre: 'Maintenance', desc: 'Mises a jour & evolution' },
-      { icon: '🔍', titre: 'SEO & Referencement', desc: 'Visible sur Google' },
-      { icon: '🛒', titre: 'E-commerce', desc: 'Vente en ligne' },
-      { icon: '📱', titre: 'Reseaux sociaux', desc: 'Strategie & contenus' },
-      { icon: '📍', titre: 'Google Business', desc: 'Fiche optimisee' },
-      { icon: '📊', titre: 'Strategie digitale', desc: 'Plan d\'action clair' },
-    ],
-  };
-
-  const prestations = prestationsSecteur[secteur] || prestationsSecteur.general;
+  // Les 8 vraies prestations Solayia (identiques pour tous les secteurs)
+  const prestations = [
+    { icon: '🌐', titre: 'Creation de sites web', desc: 'Vitrine, e-commerce, refonte, app web' },
+    { icon: '🎨', titre: 'Design & identite visuelle', desc: 'Logo, charte graphique, maquettes UX-UI' },
+    { icon: '🛡️', titre: 'Hebergement souverain', desc: 'Serveurs en France, domaine, email pro' },
+    { icon: '🔧', titre: 'Maintenance & securite', desc: 'MAJ, sauvegardes, support, surveillance' },
+    { icon: '📈', titre: 'SEO & contenu', desc: 'Referencement local, blog IA, redaction' },
+    { icon: '📣', titre: 'Marketing digital', desc: 'Google & Meta Ads, emailing, reseaux' },
+    { icon: '⚙️', titre: 'Developpement sur mesure', desc: 'Apps metier, IA generative, CRM' },
+    { icon: '🎓', titre: 'Conseil & formation', desc: 'Audit digital, accompagnement autonomie' },
+  ];
 
   // Raisons "Pourquoi Solayia" adaptees au secteur
   const raisonsSecteur: Record<string, string[]> = {
