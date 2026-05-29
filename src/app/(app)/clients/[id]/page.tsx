@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, Calendar, Clock, X, Plus, DollarSign, RotateCcw, CheckCircle, XCircle } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import { PROJET_STATUTS, TYPES_PRESTATION } from '@/lib/types';
-import type { ProjetStatut } from '@/lib/types';
+import type { ProjetStatut, PrestationLigneClient } from '@/lib/types';
 import { getClient, getClientProjets, updateClientAction, deleteClientAction } from '../actions';
 import { updateProjetAction, createProjetAction, deleteProjet } from '../../projets/actions';
 
@@ -29,14 +29,9 @@ export default function ClientDetailPage() {
   const [entreprise, setEntreprise] = useState('');
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
-  const [mrr, setMrr] = useState('0');
-  const [montantOneShot, setMontantOneShot] = useState('0');
-  const [acomptePaye, setAcomptePaye] = useState(false);
-  const [soldePaye, setSoldePaye] = useState(false);
-  const [mrrDateDebut, setMrrDateDebut] = useState('');
-  const [dureeMois, setDureeMois] = useState('');
-  const [typePrestation, setTypePrestation] = useState('');
   const [notes, setNotes] = useState('');
+  // Multi-prestations client (avec suivi paiement)
+  const [prestations, setPrestations] = useState<PrestationLigneClient[]>([]);
 
   const loadData = useCallback(async () => {
     const [c, p] = await Promise.all([
@@ -50,14 +45,35 @@ export default function ClientDetailPage() {
       setEntreprise(c.entreprise || '');
       setEmail(c.email || '');
       setTelephone(c.telephone || '');
-      setMrr(String(c.mrr || 0));
-      setMontantOneShot(String(c.montant_one_shot || 0));
-      setAcomptePaye(!!c.acompte_paye);
-      setSoldePaye(!!c.solde_paye);
-      setMrrDateDebut(c.mrr_date_debut || '');
-      setDureeMois(c.duree_mois ? String(c.duree_mois) : '');
-      setTypePrestation(c.type_prestation || '');
       setNotes(c.notes || '');
+      // Multi-prestations : depuis JSON ou reconstruction legacy
+      if (c.prestations && Array.isArray(c.prestations) && c.prestations.length > 0) {
+        setPrestations(c.prestations);
+      } else {
+        const legacy: PrestationLigneClient[] = [];
+        if ((c.montant_one_shot && c.montant_one_shot > 0) || c.type_prestation) {
+          legacy.push({
+            id: Math.random().toString(36).slice(2, 11),
+            type_prestation: c.type_prestation || '',
+            mode: 'one_shot',
+            montant: c.montant_one_shot || 0,
+            acompte_montant: 0,
+            acompte_paye: !!c.acompte_paye,
+            solde_paye: !!c.solde_paye,
+          });
+        }
+        if (c.mrr && c.mrr > 0) {
+          legacy.push({
+            id: Math.random().toString(36).slice(2, 11),
+            type_prestation: c.type_prestation || '',
+            mode: 'recurrent',
+            montant: c.mrr,
+            date_debut: c.mrr_date_debut || null,
+            date_fin: null,
+          });
+        }
+        setPrestations(legacy);
+      }
     }
     setProjets(p);
     setLoading(false);
@@ -73,14 +89,18 @@ export default function ClientDetailPage() {
     formData.set('entreprise', entreprise);
     formData.set('email', email);
     formData.set('telephone', telephone);
-    formData.set('mrr', mrr);
-    formData.set('montant_one_shot', montantOneShot);
-    formData.set('acompte_paye', String(acomptePaye));
-    formData.set('solde_paye', String(soldePaye));
-    formData.set('mrr_date_debut', mrrDateDebut);
-    formData.set('duree_mois', dureeMois);
-    formData.set('type_prestation', typePrestation);
     formData.set('notes', notes);
+    formData.set('prestations', JSON.stringify(prestations));
+    // Legacy fields (backward compat)
+    const oneShots = prestations.filter(p => p.mode === 'one_shot');
+    const recurrents = prestations.filter(p => p.mode === 'recurrent');
+    formData.set('montant_one_shot', String(oneShots.reduce((s, p) => s + p.montant, 0)));
+    formData.set('acompte_paye', String(oneShots.length > 0 && oneShots.every(p => p.acompte_paye)));
+    formData.set('solde_paye', String(oneShots.length > 0 && oneShots.every(p => p.solde_paye)));
+    formData.set('mrr', String(recurrents.reduce((s, p) => s + p.montant, 0)));
+    formData.set('mrr_date_debut', recurrents[0]?.date_debut || '');
+    formData.set('duree_mois', '');
+    formData.set('type_prestation', prestations[0]?.type_prestation || '');
 
     const result = await updateClientAction(clientId, formData);
     setSaving(false);
@@ -213,90 +233,159 @@ export default function ClientDetailPage() {
         </div>
       </div>
 
-      {/* Section financière */}
+      {/* Section financière — Multi-prestations */}
       <div className="card p-5 sm:p-6">
         <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Euro className="w-4 h-4 text-brand-600" />
-          Situation financière
+          Prestations & Paiements
         </h2>
-        <div className="space-y-4">
-          {/* Prestation */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Prestation</label>
-            <select value={typePrestation} onChange={(e) => setTypePrestation(e.target.value)} className="input-field">
-              <option value="">—</option>
-              {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
-            </select>
-          </div>
+        <div className="space-y-3">
+          {prestations.map((pr, idx) => (
+            <div key={pr.id} className={`p-4 rounded-xl border space-y-3 ${pr.mode === 'one_shot' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
+              <div className="flex items-center justify-between">
+                <h4 className={`text-xs font-bold flex items-center gap-1.5 ${pr.mode === 'one_shot' ? 'text-amber-800' : 'text-blue-800'}`}>
+                  {pr.mode === 'one_shot' ? <DollarSign className="w-3.5 h-3.5" /> : <RotateCcw className="w-3.5 h-3.5" />}
+                  Prestation #{idx + 1} — {pr.mode === 'one_shot' ? 'One-shot' : 'Récurrent'}
+                </h4>
+                <button type="button" onClick={() => setPrestations(prev => prev.filter(x => x.id !== pr.id))} className="p-1 text-gray-400 hover:text-red-500 rounded"><X className="w-4 h-4" /></button>
+              </div>
 
-          {/* One-shot */}
-          <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3">
-            <h4 className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
-              <DollarSign className="w-3.5 h-3.5" />
-              Paiement one-shot
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Montant (€)</label>
-                <input type="number" step="0.01" value={montantOneShot} onChange={(e) => setMontantOneShot(e.target.value)} className="input-field" />
+              {/* Type + Mode */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Type de prestation</label>
+                  <select value={pr.type_prestation} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, type_prestation: e.target.value } : x))} className="input-field">
+                    <option value="">—</option>
+                    {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Mode</label>
+                  <div className="flex gap-2">
+                    <button type="button" onClick={() => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, mode: 'one_shot' as const } : x))} className={`flex-1 py-2 px-3 rounded-lg border-2 text-xs font-medium transition-all ${pr.mode === 'one_shot' ? 'border-amber-400 bg-amber-100 text-amber-800' : 'border-gray-200 bg-white text-gray-500'}`}>💵 One-shot</button>
+                    <button type="button" onClick={() => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, mode: 'recurrent' as const } : x))} className={`flex-1 py-2 px-3 rounded-lg border-2 text-xs font-medium transition-all ${pr.mode === 'recurrent' ? 'border-blue-400 bg-blue-100 text-blue-800' : 'border-gray-200 bg-white text-gray-500'}`}>🔄 Récurrent</button>
+                  </div>
+                </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setAcomptePaye(!acomptePaye)}
-                className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
-                  acomptePaye ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'
-                }`}
-              >
-                {acomptePaye ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                Acompte {acomptePaye ? 'payé ✅' : 'en attente'}
-              </button>
-              <button
-                type="button"
-                onClick={() => setSoldePaye(!soldePaye)}
-                className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
-                  soldePaye ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'
-                }`}
-              >
-                {soldePaye ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
-                Solde {soldePaye ? 'payé ✅' : 'en attente'}
-              </button>
-            </div>
-          </div>
 
-          {/* MRR */}
-          <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 space-y-3">
-            <h4 className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
-              <RotateCcw className="w-3.5 h-3.5" />
-              Récurrent (MRR)
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {/* Montant */}
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Montant (€/mois)</label>
-                <input type="number" step="0.01" value={mrr} onChange={(e) => setMrr(e.target.value)} className="input-field" />
+                <label className="block text-xs font-medium text-gray-600 mb-1">Montant {pr.mode === 'recurrent' ? '(€/mois)' : 'total (€)'}</label>
+                <input type="number" step="0.01" value={pr.montant || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, montant: Number(e.target.value) || 0 } : x))} className="input-field" />
               </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Date début</label>
-                <input type="date" value={mrrDateDebut} onChange={(e) => setMrrDateDebut(e.target.value)} className="input-field" />
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Durée (mois)</label>
-                <input type="number" value={dureeMois} onChange={(e) => setDureeMois(e.target.value)} className="input-field" placeholder="Indéfinie" />
-              </div>
-            </div>
-          </div>
 
-          {/* Résumé CA */}
-          {(Number(montantOneShot) > 0 || Number(mrr) > 0) && (
-            <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
-              <p className="font-semibold text-gray-900">Résumé CA client :</p>
-              {Number(montantOneShot) > 0 && (
-                <p className="text-gray-700">💵 One-shot : {Number(montantOneShot).toLocaleString('fr-FR')} € {acomptePaye && soldePaye ? '(payé ✅)' : acomptePaye ? '(acompte ✅)' : '(en attente)'}</p>
+              {/* One-shot: acompte + solde */}
+              {pr.mode === 'one_shot' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Montant acompte (€)</label>
+                      <input type="number" step="0.01" value={pr.acompte_montant || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, acompte_montant: Number(e.target.value) || 0 } : x))} className="input-field" placeholder="0" />
+                    </div>
+                    <button type="button" onClick={() => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, acompte_paye: !x.acompte_paye } : x))} className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${pr.acompte_paye ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'}`}>
+                      {pr.acompte_paye ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                      Acompte {pr.acompte_paye ? 'payé' : 'en attente'}
+                    </button>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+                    <div className="text-sm text-gray-700">
+                      Solde restant : <span className="font-bold">{((pr.montant || 0) - (pr.acompte_montant || 0)).toLocaleString('fr-FR')} €</span>
+                    </div>
+                    <button type="button" onClick={() => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, solde_paye: !x.solde_paye } : x))} className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${pr.solde_paye ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'}`}>
+                      {pr.solde_paye ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                      Solde {pr.solde_paye ? 'payé' : 'en attente'}
+                    </button>
+                  </div>
+                  {/* Résumé paiement one-shot */}
+                  <div className="text-xs pt-2 border-t border-amber-200 space-y-0.5">
+                    <p className="font-semibold text-amber-900">Total payé : {((pr.acompte_paye ? (pr.acompte_montant || 0) : 0) + (pr.solde_paye ? (pr.montant || 0) - (pr.acompte_montant || 0) : 0)).toLocaleString('fr-FR')} € / {(pr.montant || 0).toLocaleString('fr-FR')} €</p>
+                  </div>
+                </div>
               )}
-              {Number(mrr) > 0 && (
-                <p className="text-gray-700">🔄 MRR : {Number(mrr).toLocaleString('fr-FR')} €/mois {dureeMois ? `× ${dureeMois} mois` : '(indéfini)'}</p>
+
+              {/* Récurrent: dates */}
+              {pr.mode === 'recurrent' && (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Date début</label>
+                      <input type="date" value={pr.date_debut || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, date_debut: e.target.value || null } : x))} className="input-field" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-gray-600 mb-1">Date fin (vide = indéfinie)</label>
+                      <input type="date" value={pr.date_fin || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, date_fin: e.target.value || null } : x))} className="input-field" />
+                    </div>
+                  </div>
+                  {pr.date_debut && (
+                    <div className="text-xs pt-2 border-t border-blue-200 text-blue-900">
+                      {(() => {
+                        const start = new Date(pr.date_debut);
+                        const end = pr.date_fin ? new Date(pr.date_fin) : new Date();
+                        const now = new Date();
+                        const effectiveEnd = end < now ? end : now;
+                        if (effectiveEnd <= start) return <p>Pas encore démarré</p>;
+                        const moisEcoules = (effectiveEnd.getFullYear() - start.getFullYear()) * 12 + (effectiveEnd.getMonth() - start.getMonth()) + (effectiveEnd.getDate() >= start.getDate() ? 1 : 0);
+                        return <p className="font-semibold">{moisEcoules} mois écoulés = {(pr.montant * Math.max(0, moisEcoules)).toLocaleString('fr-FR')} € encaissés</p>;
+                      })()}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-          )}
+          ))}
+
+          {/* Bouton ajouter */}
+          <button type="button" onClick={() => setPrestations(prev => [...prev, { id: Math.random().toString(36).slice(2, 11), type_prestation: '', mode: 'one_shot', montant: 0, acompte_montant: 0, acompte_paye: false, solde_paye: false }])} className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-brand-400 hover:text-brand-600 hover:bg-brand-50 transition-all">
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">Ajouter une prestation</span>
+          </button>
+
+          {/* Résumé global */}
+          {prestations.length > 0 && prestations.some(pr => pr.montant > 0) && (() => {
+            let realise = 0;
+            let estime = 0;
+            for (const pr of prestations) {
+              if (pr.mode === 'one_shot') {
+                const acompteMt = pr.acompte_montant || 0;
+                const soldeMt = (pr.montant || 0) - acompteMt;
+                if (pr.acompte_paye) realise += acompteMt;
+                else estime += acompteMt;
+                if (pr.solde_paye) realise += soldeMt;
+                else estime += soldeMt;
+              } else if (pr.mode === 'recurrent' && pr.date_debut) {
+                const start = new Date(pr.date_debut);
+                const now = new Date();
+                const end = pr.date_fin ? new Date(pr.date_fin) : null;
+                const effectiveEnd = end && end < now ? end : now;
+                if (effectiveEnd > start) {
+                  const moisEcoules = (effectiveEnd.getFullYear() - start.getFullYear()) * 12 + (effectiveEnd.getMonth() - start.getMonth()) + (effectiveEnd.getDate() >= start.getDate() ? 1 : 0);
+                  realise += pr.montant * Math.max(0, moisEcoules);
+                }
+                if (!end || end > now) {
+                  const futureEnd = end || new Date(now.getFullYear(), 11, 31);
+                  const futureMonths = (futureEnd.getFullYear() - now.getFullYear()) * 12 + (futureEnd.getMonth() - now.getMonth());
+                  estime += pr.montant * Math.max(0, futureMonths);
+                }
+              } else {
+                estime += pr.montant || 0;
+              }
+            }
+            return (
+              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <p className="font-semibold text-gray-900 text-sm">Résumé financier</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 bg-green-50 rounded-lg border border-green-200 text-center">
+                    <p className="text-[11px] text-green-600 font-medium">Réalisé (payé)</p>
+                    <p className="text-lg font-bold text-green-700">{realise.toLocaleString('fr-FR')} €</p>
+                  </div>
+                  <div className="p-3 bg-amber-50 rounded-lg border border-amber-200 text-center">
+                    <p className="text-[11px] text-amber-600 font-medium">Estimé restant</p>
+                    <p className="text-lg font-bold text-amber-700">{estime.toLocaleString('fr-FR')} €</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </div>
 

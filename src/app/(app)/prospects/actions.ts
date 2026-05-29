@@ -148,12 +148,24 @@ export async function updateProspect(id: string, formData: FormData) {
   const ca = formData.get('ca_en_k') as string;
   updates.ca_en_k = ca ? parseFloat(ca) : null;
 
+  // Multi-prestations JSON
+  const prestationsStr = formData.get('prestations') as string;
+  if (prestationsStr) {
+    try { updates.prestations = JSON.parse(prestationsStr); } catch {}
+  }
+
+  // Essai avec prestations JSON
   const { error } = await supabase
     .from('prospects')
     .update(updates)
     .eq('id', id);
 
-  if (error) return { error: error.message };
+  if (error) {
+    // Fallback sans colonne prestations
+    delete updates.prestations;
+    const { error: fallbackError } = await supabase.from('prospects').update(updates).eq('id', id);
+    if (fallbackError) return { error: fallbackError.message };
+  }
 
   revalidatePath('/prospects');
   revalidatePath(`/prospects/${id}`);
@@ -249,7 +261,7 @@ export async function convertToClient(prospectId: string, financialData?: Conver
     prospect_origine_id: prospectId,
   };
 
-  // Add financial fields (graceful: Supabase ignores unknown columns)
+  // Add financial fields
   if (financialData) {
     clientInsert.montant_one_shot = financialData.montant_one_shot || 0;
     clientInsert.acompte_paye = financialData.acompte_paye || false;
@@ -257,6 +269,10 @@ export async function convertToClient(prospectId: string, financialData?: Conver
     clientInsert.mrr_date_debut = financialData.mrr_date_debut || null;
     clientInsert.duree_mois = financialData.duree_mois || null;
     clientInsert.type_prestation = financialData.type_prestation || null;
+    // Multi-prestations JSON
+    if (financialData.prestations && financialData.prestations.length > 0) {
+      clientInsert.prestations = financialData.prestations;
+    }
   }
 
   const { data: client, error: clientError } = await supabase

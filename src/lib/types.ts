@@ -124,8 +124,37 @@ export const TARIF_TYPES: { value: TarifType; label: string; emoji: string }[] =
   { value: 'mensuel', label: 'Mensuel', emoji: '🔄' },
 ];
 
+// --- Multi-prestations ---
+
+// Ligne de prestation côté prospect (estimations)
+export interface PrestationLigneProspect {
+  id: string;
+  type_prestation: string;
+  mode: 'one_shot' | 'recurrent';
+  montant: number;
+  date_debut_estimee?: string | null;
+  duree_mois?: number | null;
+}
+
+// Ligne de prestation côté client (avec suivi paiement)
+export interface PrestationLigneClient {
+  id: string;
+  type_prestation: string;
+  mode: 'one_shot' | 'recurrent';
+  montant: number;
+  // One-shot payment tracking
+  acompte_paye?: boolean;
+  acompte_montant?: number;
+  solde_paye?: boolean;
+  // Recurrent tracking
+  date_debut?: string | null;
+  date_fin?: string | null;
+}
+
 // Données financières pour la conversion prospect → client
 export interface ConversionData {
+  prestations: PrestationLigneClient[];
+  // Champs legacy pour fallback Supabase
   montant_one_shot: number;
   acompte_paye: boolean;
   solde_paye: boolean;
@@ -206,6 +235,8 @@ export interface Prospect {
   // --- Qualification & conversion ---
   prospect_checklist: Record<string, boolean> | null;
   motif_perte: string | null;
+  // --- Multi-prestations ---
+  prestations?: PrestationLigneProspect[] | null;
 }
 
 export interface Client {
@@ -223,6 +254,8 @@ export interface Client {
   mrr_date_debut: string | null;
   duree_mois: number | null;
   type_prestation: string | null;
+  // --- Multi-prestations ---
+  prestations?: PrestationLigneClient[] | null;
   // ---
   prospect_origine_id: string | null;
   notes: string | null;

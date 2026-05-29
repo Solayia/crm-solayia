@@ -88,15 +88,26 @@ export async function updateClientAction(id: string, formData: FormData) {
     type_prestation: (formData.get('type_prestation') as string) || null,
   };
 
+  // Multi-prestations JSON
+  const prestationsStr = formData.get('prestations') as string;
+  if (prestationsStr) {
+    try { updates.prestations = JSON.parse(prestationsStr); } catch {}
+  }
+
   const { error } = await supabase.from('clients').update(updates).eq('id', id);
 
   if (error) {
-    // Fallback sans les nouveaux champs si colonnes pas encore créées
-    const { error: fallbackError } = await supabase.from('clients').update({
-      nom: updates.nom, prenom: updates.prenom, entreprise: updates.entreprise,
-      email: updates.email, telephone: updates.telephone, mrr: updates.mrr, notes: updates.notes,
-    }).eq('id', id);
-    if (fallbackError) return { error: fallbackError.message };
+    // Fallback sans prestations JSON
+    delete updates.prestations;
+    const { error: err2 } = await supabase.from('clients').update(updates).eq('id', id);
+    if (err2) {
+      // Fallback minimal
+      const { error: fallbackError } = await supabase.from('clients').update({
+        nom: updates.nom, prenom: updates.prenom, entreprise: updates.entreprise,
+        email: updates.email, telephone: updates.telephone, mrr: updates.mrr, notes: updates.notes,
+      }).eq('id', id);
+      if (fallbackError) return { error: fallbackError.message };
+    }
   }
 
   revalidatePath('/clients');

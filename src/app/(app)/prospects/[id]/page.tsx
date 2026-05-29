@@ -15,7 +15,7 @@ import {
   PROSPECT_TEMPERATURES, TYPES_CONTACT, SOURCES_PROSPECT,
   PIPELINE_COMMERCIAL, PIPELINE_PROJET,
 } from '@/lib/types';
-import type { ProspectStatut, ProspectUrgence, ProspectTemperature, TypeContact, TarifType } from '@/lib/types';
+import type { ProspectStatut, ProspectUrgence, ProspectTemperature, TypeContact, TarifType, PrestationLigneProspect } from '@/lib/types';
 import {
   getProspect, getProfiles, updateProspect, deleteProspect,
   getProspectInteractions, createInteraction, deleteInteraction,
@@ -69,14 +69,10 @@ export default function ProspectDetailPage() {
   const [produitCible, setProduitCible] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Form fields — Prestation
-  const [typePrestation, setTypePrestation] = useState('');
+  // Form fields — Prestations (multi-lignes)
+  const [prestations, setPrestations] = useState<PrestationLigneProspect[]>([]);
   const [descriptionPrestation, setDescriptionPrestation] = useState('');
   const [adresseChantier, setAdresseChantier] = useState('');
-  const [tarifPropose, setTarifPropose] = useState('');
-  const [tarifType, setTarifType] = useState<TarifType | ''>('');
-  const [dureeMois, setDureeMois] = useState('');
-  const [dureeIndefinie, setDureeIndefinie] = useState(false);
   const [urgence, setUrgence] = useState<ProspectUrgence>('normale');
   const [datePremierContact, setDatePremierContact] = useState('');
   const [dateRelance, setDateRelance] = useState('');
@@ -118,13 +114,23 @@ export default function ProspectDetailPage() {
       setTypeContact(p.type_contact || 'prospect');
       setProduitCible(p.produit_cible || '');
       setNotes(p.notes || '');
-      setTypePrestation(p.type_prestation || '');
+      // Multi-prestations : depuis JSON ou reconstruction legacy
+      if (p.prestations && Array.isArray(p.prestations) && p.prestations.length > 0) {
+        setPrestations(p.prestations);
+      } else if (p.type_prestation || p.tarif_propose) {
+        setPrestations([{
+          id: Math.random().toString(36).slice(2, 11),
+          type_prestation: p.type_prestation || '',
+          mode: p.tarif_type === 'mensuel' ? 'recurrent' : 'one_shot',
+          montant: p.tarif_propose || 0,
+          duree_mois: p.duree_mois || null,
+          date_debut_estimee: null,
+        }]);
+      } else {
+        setPrestations([]);
+      }
       setDescriptionPrestation(p.description_prestation || '');
       setAdresseChantier(p.adresse_chantier || '');
-      setTarifPropose(p.tarif_propose ? String(p.tarif_propose) : '');
-      setTarifType(p.tarif_type || '');
-      setDureeMois(p.duree_mois ? String(p.duree_mois) : '');
-      setDureeIndefinie(p.tarif_type === 'mensuel' && !p.duree_mois);
       setUrgence(p.urgence || 'normale');
       setDatePremierContact(p.date_premier_contact || '');
       setDateRelance(p.date_relance || '');
@@ -167,12 +173,15 @@ export default function ProspectDetailPage() {
     formData.set('type_contact', typeContact);
     formData.set('produit_cible', produitCible);
     formData.set('notes', notes);
-    formData.set('type_prestation', typePrestation);
+    formData.set('prestations', JSON.stringify(prestations));
+    // Legacy fields depuis 1ère prestation (backward compat)
+    const firstPresta = prestations[0];
+    formData.set('type_prestation', firstPresta?.type_prestation || '');
+    formData.set('tarif_propose', firstPresta ? String(firstPresta.montant) : '');
+    formData.set('tarif_type', firstPresta?.mode === 'recurrent' ? 'mensuel' : 'one_shot');
+    formData.set('duree_mois', firstPresta?.duree_mois ? String(firstPresta.duree_mois) : '');
     formData.set('description_prestation', descriptionPrestation);
     formData.set('adresse_chantier', adresseChantier);
-    formData.set('tarif_propose', tarifPropose);
-    formData.set('tarif_type', tarifType);
-    formData.set('duree_mois', dureeIndefinie ? '' : dureeMois);
     formData.set('urgence', urgence);
     formData.set('date_premier_contact', datePremierContact);
     formData.set('date_relance', dateRelance);
@@ -331,11 +340,11 @@ export default function ProspectDetailPage() {
           prospect={{
             nom, prenom, entreprise, email, telephone,
             temperature, source,
-            type_prestation: typePrestation || null,
+            type_prestation: prestations[0]?.type_prestation || null,
             produit_cible: produitCible,
             notes: notes || null,
             description_prestation: descriptionPrestation || null,
-            tarif_propose: tarifPropose ? parseFloat(tarifPropose) : null,
+            tarif_propose: prestations[0]?.montant || null,
             adresse_chantier: adresseChantier || null,
           }}
           statut={statut}
@@ -564,110 +573,89 @@ export default function ProspectDetailPage() {
         </div>
       </div>
 
-      {/* Section 2 : Prestation & Tarif */}
+      {/* Section 2 : Prestations estimées (multi-lignes) */}
       <div className={`card p-5 sm:p-6 ${activeSection !== 'prestation' ? 'hidden sm:block' : ''}`}>
         <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
           <Briefcase className="w-4 h-4 text-brand-600" />
-          Prestation & Tarif
+          Prestations estimées
         </h2>
-        <div className="space-y-4">
-          {/* Type prestation */}
-          <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1">Type de prestation</label>
-            <select value={typePrestation} onChange={(e) => setTypePrestation(e.target.value)} className="input-field">
-              <option value="">—</option>
-              {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
-            </select>
-          </div>
-
-          {/* Tarification structurée */}
-          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
-            <div className="flex items-center gap-2 mb-1">
-              <Euro className="w-4 h-4 text-brand-600" />
-              <span className="text-xs font-semibold text-gray-700">Tarification estimée</span>
-            </div>
-
-            {/* Type de tarif : boutons one-shot / mensuel */}
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1.5">Type de tarif</label>
-              <div className="flex gap-2">
-                {TARIF_TYPES.map((t) => (
-                  <button
-                    key={t.value}
-                    type="button"
-                    onClick={() => setTarifType(t.value)}
-                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
-                      tarifType === t.value
-                        ? 'border-brand-400 bg-brand-50 text-brand-700'
-                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
-                    }`}
-                  >
-                    {t.emoji} {t.label}
-                  </button>
-                ))}
+        <div className="space-y-3">
+          {prestations.map((pr, idx) => (
+            <div key={pr.id} className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-3 relative">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-gray-500">Prestation #{idx + 1}</span>
+                <button type="button" onClick={() => setPrestations(prev => prev.filter(x => x.id !== pr.id))} className="p-1 text-gray-400 hover:text-red-500 rounded"><X className="w-4 h-4" /></button>
               </div>
-            </div>
-
-            {/* Montant estimé */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">
-                  Montant estimé {tarifType === 'mensuel' ? '(€/mois)' : '(€)'}
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={tarifPropose}
-                  onChange={(e) => setTarifPropose(e.target.value)}
-                  className="input-field"
-                  placeholder={tarifType === 'mensuel' ? '490.00' : '1490.00'}
-                />
+                <label className="block text-xs font-medium text-gray-600 mb-1">Type de prestation</label>
+                <select value={pr.type_prestation} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, type_prestation: e.target.value } : x))} className="input-field">
+                  <option value="">—</option>
+                  {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+                </select>
               </div>
-
-              {/* Durée (visible si mensuel) */}
-              {tarifType === 'mensuel' && (
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1.5">Type de tarif</label>
+                <div className="flex gap-2">
+                  {TARIF_TYPES.map((t) => (
+                    <button key={t.value} type="button" onClick={() => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, mode: t.value === 'mensuel' ? 'recurrent' as const : 'one_shot' as const } : x))} className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all ${(pr.mode === 'recurrent' ? 'mensuel' : 'one_shot') === t.value ? 'border-brand-400 bg-brand-50 text-brand-700' : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'}`}>
+                      {t.emoji} {t.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Durée</label>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      value={dureeIndefinie ? '' : dureeMois}
-                      onChange={(e) => { setDureeMois(e.target.value); setDureeIndefinie(false); }}
-                      className="input-field flex-1"
-                      placeholder="12"
-                      disabled={dureeIndefinie}
-                    />
-                    <span className="text-xs text-gray-500 shrink-0">mois</span>
-                    <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={dureeIndefinie}
-                        onChange={(e) => { setDureeIndefinie(e.target.checked); if (e.target.checked) setDureeMois(''); }}
-                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
-                      />
-                      <span className="text-xs text-gray-600">Indéfinie</span>
-                    </label>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Montant estimé {pr.mode === 'recurrent' ? '(€/mois)' : '(€)'}</label>
+                  <input type="number" step="0.01" value={pr.montant || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, montant: Number(e.target.value) || 0 } : x))} className="input-field" placeholder={pr.mode === 'recurrent' ? '490.00' : '1490.00'} />
+                </div>
+                {pr.mode === 'recurrent' && (
+                  <div>
+                    <label className="block text-xs font-medium text-gray-600 mb-1">Durée (mois)</label>
+                    <input type="number" value={pr.duree_mois || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, duree_mois: Number(e.target.value) || null } : x))} className="input-field" placeholder="Vide = indéfinie" />
                   </div>
+                )}
+              </div>
+              {pr.mode === 'recurrent' && (
+                <div className="sm:w-1/2">
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date début estimée</label>
+                  <input type="date" value={pr.date_debut_estimee || ''} onChange={(e) => setPrestations(prev => prev.map(x => x.id === pr.id ? { ...x, date_debut_estimee: e.target.value || null } : x))} className="input-field" />
+                </div>
+              )}
+              {pr.montant > 0 && (
+                <div className="text-xs font-medium text-brand-700 pt-1 border-t border-gray-200">
+                  {pr.mode === 'recurrent' && pr.duree_mois ? `📊 ${pr.montant.toLocaleString('fr-FR')} €/mois × ${pr.duree_mois} mois = ${(pr.montant * pr.duree_mois).toLocaleString('fr-FR')} €` : pr.mode === 'recurrent' ? `📊 ${pr.montant.toLocaleString('fr-FR')} €/mois (récurrent)` : `📊 ${pr.montant.toLocaleString('fr-FR')} € (one-shot)`}
                 </div>
               )}
             </div>
+          ))}
 
-            {/* Résumé CA estimé */}
-            {tarifPropose && (
-              <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
-                <span className="text-xs font-medium text-gray-500">📊 CA estimé :</span>
-                <span className="text-sm font-bold text-brand-700">
-                  {tarifType === 'mensuel' && !dureeIndefinie && dureeMois
-                    ? `${Number(tarifPropose).toLocaleString('fr-FR')} €/mois × ${dureeMois} mois = ${(Number(tarifPropose) * Number(dureeMois)).toLocaleString('fr-FR')} €`
-                    : tarifType === 'mensuel'
-                      ? `${Number(tarifPropose).toLocaleString('fr-FR')} €/mois (récurrent)`
-                      : `${Number(tarifPropose).toLocaleString('fr-FR')} € (one-shot)`
-                  }
-                </span>
+          <button type="button" onClick={() => setPrestations(prev => [...prev, { id: Math.random().toString(36).slice(2, 11), type_prestation: '', mode: 'one_shot', montant: 0, duree_mois: null, date_debut_estimee: null }])} className="w-full flex items-center justify-center gap-2 p-3 rounded-xl border-2 border-dashed border-gray-300 text-gray-500 hover:border-brand-400 hover:text-brand-600 hover:bg-brand-50 transition-all">
+            <Plus className="w-4 h-4" />
+            <span className="text-sm font-medium">Ajouter une prestation</span>
+          </button>
+
+          {prestations.length > 0 && prestations.some(pr => pr.montant > 0) && (
+            <div className="p-3 bg-brand-50 rounded-lg border border-brand-200">
+              <div className="flex items-center gap-2 mb-1">
+                <Euro className="w-4 h-4 text-brand-600" />
+                <span className="text-xs font-bold text-brand-800">Total estimé</span>
               </div>
-            )}
-          </div>
+              <div className="text-lg font-bold text-brand-700">
+                {prestations.reduce((sum, pr) => sum + (pr.mode === 'recurrent' ? pr.montant * (pr.duree_mois || 12) : pr.montant), 0).toLocaleString('fr-FR')} €
+              </div>
+              <div className="text-[11px] text-brand-600 space-y-0.5 mt-1">
+                {prestations.some(pr => pr.mode === 'one_shot' && pr.montant > 0) && (
+                  <p>💵 {prestations.filter(pr => pr.mode === 'one_shot').reduce((s, pr) => s + pr.montant, 0).toLocaleString('fr-FR')} € en one-shot</p>
+                )}
+                {prestations.some(pr => pr.mode === 'recurrent' && pr.montant > 0) && (
+                  <p>🔄 {prestations.filter(pr => pr.mode === 'recurrent').reduce((s, pr) => s + pr.montant, 0).toLocaleString('fr-FR')} €/mois en récurrent</p>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
+        <div className="space-y-4 mt-5 pt-5 border-t border-gray-100">
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Description de la prestation</label>
             <textarea value={descriptionPrestation} onChange={(e) => setDescriptionPrestation(e.target.value)} rows={3} className="input-field" placeholder="Détail de la prestation souhaitée ou proposée..." />
@@ -794,11 +782,12 @@ export default function ProspectDetailPage() {
           temperature,
           email,
           telephone,
-          type_prestation: typePrestation || null,
-          tarif_propose: tarifPropose ? parseFloat(tarifPropose) : null,
+          type_prestation: prestations[0]?.type_prestation || null,
+          tarif_propose: prestations[0]?.montant || null,
           prospect_checklist: prospect.prospect_checklist || null,
           motif_perte: prospect.motif_perte || null,
           date_premier_contact: datePremierContact || null,
+          prestations: prestations.length > 0 ? prestations : null,
         }}
         interactions={interactions}
         onUpdate={loadData}
@@ -818,9 +807,9 @@ export default function ProspectDetailPage() {
           prospectData={{
             nom, prenom, entreprise, email, telephone,
             adresse: adresse || undefined,
-            type_prestation: typePrestation || undefined,
+            type_prestation: prestations[0]?.type_prestation || undefined,
             description_prestation: descriptionPrestation || undefined,
-            tarif_propose: tarifPropose ? parseFloat(tarifPropose) : undefined,
+            tarif_propose: prestations[0]?.montant || undefined,
             adresse_chantier: adresseChantier || undefined,
           }}
           onClose={() => setShowProposalEditor(false)}

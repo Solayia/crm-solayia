@@ -111,21 +111,32 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
   const [motifLoading, setMotifLoading] = useState(false);
   const [checklistLoading, setChecklistLoading] = useState(false);
 
-  // --- Conversion form state (pré-rempli depuis le prospect) ---
-  const [convPrestation, setConvPrestation] = useState(prospect.type_prestation || '');
-  const [convOneShot, setConvOneShot] = useState(
-    prospect.tarif_type !== 'mensuel' && prospect.tarif_propose ? String(prospect.tarif_propose) : ''
-  );
-  const [convAcompte, setConvAcompte] = useState(false);
-  const [convSolde, setConvSolde] = useState(false);
-  const [convMrr, setConvMrr] = useState(
-    prospect.tarif_type === 'mensuel' && prospect.tarif_propose ? String(prospect.tarif_propose) : ''
-  );
-  const [convMrrDebut, setConvMrrDebut] = useState(new Date().toISOString().slice(0, 10));
-  const [convDuree, setConvDuree] = useState(
-    prospect.duree_mois ? String(prospect.duree_mois) : ''
-  );
-  const [convDureeIndef, setConvDureeIndef] = useState(!prospect.duree_mois && prospect.tarif_type === 'mensuel');
+  // --- Conversion form state : multi-prestations pré-rempli ---
+  const buildInitialClientPrestations = () => {
+    if (prospect.prestations && prospect.prestations.length > 0) {
+      return prospect.prestations.map(p => ({
+        id: p.id,
+        type_prestation: p.type_prestation,
+        mode: p.mode,
+        montant: p.montant,
+        acompte_montant: 0,
+        acompte_paye: false,
+        solde_paye: false,
+        date_debut: p.date_debut_estimee || (p.mode === 'recurrent' ? new Date().toISOString().slice(0, 10) : null),
+        date_fin: null as string | null,
+      }));
+    }
+    // Legacy : 1 prestation depuis champs plats
+    const items: any[] = [];
+    if (prospect.tarif_type !== 'mensuel' && prospect.tarif_propose) {
+      items.push({ id: Math.random().toString(36).slice(2, 11), type_prestation: prospect.type_prestation || '', mode: 'one_shot' as const, montant: prospect.tarif_propose, acompte_montant: 0, acompte_paye: false, solde_paye: false, date_debut: null, date_fin: null });
+    }
+    if (prospect.tarif_type === 'mensuel' && prospect.tarif_propose) {
+      items.push({ id: Math.random().toString(36).slice(2, 11), type_prestation: prospect.type_prestation || '', mode: 'recurrent' as const, montant: prospect.tarif_propose, acompte_montant: 0, acompte_paye: false, solde_paye: false, date_debut: new Date().toISOString().slice(0, 10), date_fin: null });
+    }
+    return items;
+  };
+  const [convPrestations, setConvPrestations] = useState(buildInitialClientPrestations);
 
   const checklist = prospect.prospect_checklist || {};
   const { score, details } = calculateScore(prospect, interactions);
@@ -133,14 +144,18 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
   // --- Convert to client ---
   const handleConvert = async () => {
     setConvertLoading(true);
+    const oneShots = convPrestations.filter((p: any) => p.mode === 'one_shot');
+    const recurrents = convPrestations.filter((p: any) => p.mode === 'recurrent');
     const financialData: ConversionData = {
-      montant_one_shot: Number(convOneShot) || 0,
-      acompte_paye: convAcompte,
-      solde_paye: convSolde,
-      mrr: Number(convMrr) || 0,
-      mrr_date_debut: convMrr ? convMrrDebut : null,
-      duree_mois: convDureeIndef ? null : (Number(convDuree) || null),
-      type_prestation: convPrestation || null,
+      prestations: convPrestations,
+      // Legacy fallback
+      montant_one_shot: oneShots.reduce((s: number, p: any) => s + (p.montant || 0), 0),
+      acompte_paye: oneShots.length > 0 && oneShots.every((p: any) => p.acompte_paye),
+      solde_paye: oneShots.length > 0 && oneShots.every((p: any) => p.solde_paye),
+      mrr: recurrents.reduce((s: number, p: any) => s + (p.montant || 0), 0),
+      mrr_date_debut: recurrents[0]?.date_debut || null,
+      duree_mois: null,
+      type_prestation: convPrestations[0]?.type_prestation || null,
     };
     const result = await convertToClient(prospect.id, financialData);
     setConvertLoading(false);
@@ -424,113 +439,53 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
               </button>
             </div>
 
-            {/* Prestation */}
-            <div className="mb-4">
-              <label className="block text-xs font-semibold text-gray-700 mb-1">Prestation</label>
-              <select value={convPrestation} onChange={(e) => setConvPrestation(e.target.value)} className="input-field">
-                <option value="">—</option>
-                {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
-              </select>
-            </div>
-
-            {/* Section One-shot */}
-            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 mb-4 space-y-3">
-              <h4 className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
-                <DollarSign className="w-3.5 h-3.5" />
-                Paiement one-shot
-              </h4>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Montant réel (€)</label>
-                <input
-                  type="number" step="0.01"
-                  value={convOneShot}
-                  onChange={(e) => setConvOneShot(e.target.value)}
-                  className="input-field"
-                  placeholder="1490.00"
-                />
-              </div>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={convAcompte}
-                    onChange={(e) => setConvAcompte(e.target.checked)}
-                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                  />
-                  <span className="text-sm text-gray-700">Acompte payé</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={convSolde}
-                    onChange={(e) => setConvSolde(e.target.checked)}
-                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
-                  />
-                  <span className="text-sm text-gray-700">Solde payé</span>
-                </label>
-              </div>
-            </div>
-
-            {/* Section MRR */}
-            <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 mb-5 space-y-3">
-              <h4 className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
-                <RotateCcw className="w-3.5 h-3.5" />
-                Récurrent (MRR)
-              </h4>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Montant mensuel (€/mois)</label>
-                  <input
-                    type="number" step="0.01"
-                    value={convMrr}
-                    onChange={(e) => setConvMrr(e.target.value)}
-                    className="input-field"
-                    placeholder="490.00"
-                  />
+            {/* Prestations multi-lignes */}
+            <div className="space-y-3 mb-5">
+              {convPrestations.map((pr: any, idx: number) => (
+                <div key={pr.id} className={`p-3 rounded-xl border space-y-2 ${pr.mode === 'one_shot' ? 'bg-amber-50 border-amber-200' : 'bg-blue-50 border-blue-200'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-gray-600">#{idx + 1} {pr.mode === 'one_shot' ? '💵 One-shot' : '🔄 Récurrent'}</span>
+                    {convPrestations.length > 1 && (
+                      <button type="button" onClick={() => setConvPrestations((prev: any) => prev.filter((x: any) => x.id !== pr.id))} className="p-1 text-gray-400 hover:text-red-500"><X className="w-3.5 h-3.5" /></button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Prestation</label>
+                      <select value={pr.type_prestation} onChange={(e) => setConvPrestations((prev: any) => prev.map((x: any) => x.id === pr.id ? { ...x, type_prestation: e.target.value } : x))} className="input-field text-xs">
+                        <option value="">—</option>
+                        {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Montant {pr.mode === 'recurrent' ? '€/mois' : '€'}</label>
+                      <input type="number" step="0.01" value={pr.montant || ''} onChange={(e) => setConvPrestations((prev: any) => prev.map((x: any) => x.id === pr.id ? { ...x, montant: Number(e.target.value) || 0 } : x))} className="input-field text-xs" />
+                    </div>
+                  </div>
+                  {pr.mode === 'one_shot' && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <label className="block text-[10px] font-medium text-gray-600 mb-0.5">Acompte (€)</label>
+                        <input type="number" step="0.01" value={pr.acompte_montant || ''} onChange={(e) => setConvPrestations((prev: any) => prev.map((x: any) => x.id === pr.id ? { ...x, acompte_montant: Number(e.target.value) || 0 } : x))} className="input-field text-xs" />
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <label className="flex items-center gap-1 cursor-pointer text-xs"><input type="checkbox" checked={pr.acompte_paye} onChange={(e) => setConvPrestations((prev: any) => prev.map((x: any) => x.id === pr.id ? { ...x, acompte_paye: e.target.checked } : x))} className="rounded border-gray-300 text-green-600" /><span>Acompte payé</span></label>
+                      </div>
+                    </div>
+                  )}
+                  {pr.mode === 'recurrent' && (
+                    <div className="grid grid-cols-2 gap-2">
+                      <div><label className="block text-[10px] font-medium text-gray-600 mb-0.5">Date début</label><input type="date" value={pr.date_debut || ''} onChange={(e) => setConvPrestations((prev: any) => prev.map((x: any) => x.id === pr.id ? { ...x, date_debut: e.target.value || null } : x))} className="input-field text-xs" /></div>
+                      <div><label className="block text-[10px] font-medium text-gray-600 mb-0.5">Date fin</label><input type="date" value={pr.date_fin || ''} onChange={(e) => setConvPrestations((prev: any) => prev.map((x: any) => x.id === pr.id ? { ...x, date_fin: e.target.value || null } : x))} className="input-field text-xs" /></div>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-600 mb-1">Date début MRR</label>
-                  <input
-                    type="date"
-                    value={convMrrDebut}
-                    onChange={(e) => setConvMrrDebut(e.target.value)}
-                    className="input-field"
-                  />
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium text-gray-600 mb-1">Durée d&apos;engagement</label>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="number"
-                    value={convDureeIndef ? '' : convDuree}
-                    onChange={(e) => { setConvDuree(e.target.value); setConvDureeIndef(false); }}
-                    className="input-field flex-1"
-                    placeholder="12"
-                    disabled={convDureeIndef}
-                  />
-                  <span className="text-xs text-gray-500 shrink-0">mois</span>
-                  <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={convDureeIndef}
-                      onChange={(e) => { setConvDureeIndef(e.target.checked); if (e.target.checked) setConvDuree(''); }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                    />
-                    <span className="text-xs text-gray-600">Indéfinie</span>
-                  </label>
-                </div>
+              ))}
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setConvPrestations((prev: any) => [...prev, { id: Math.random().toString(36).slice(2, 11), type_prestation: '', mode: 'one_shot', montant: 0, acompte_montant: 0, acompte_paye: false, solde_paye: false, date_debut: null, date_fin: null }])} className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg border border-dashed border-amber-300 text-amber-600 text-xs hover:bg-amber-50">💵 + One-shot</button>
+                <button type="button" onClick={() => setConvPrestations((prev: any) => [...prev, { id: Math.random().toString(36).slice(2, 11), type_prestation: '', mode: 'recurrent', montant: 0, acompte_montant: 0, acompte_paye: false, solde_paye: false, date_debut: new Date().toISOString().slice(0, 10), date_fin: null }])} className="flex-1 flex items-center justify-center gap-1 p-2 rounded-lg border border-dashed border-blue-300 text-blue-600 text-xs hover:bg-blue-50">🔄 + Récurrent</button>
               </div>
             </div>
-
-            {/* Résumé */}
-            {(convOneShot || convMrr) && (
-              <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm text-gray-700 space-y-1">
-                <p className="font-semibold text-gray-900">Résumé financier :</p>
-                {convOneShot && <p>💵 One-shot : {Number(convOneShot).toLocaleString('fr-FR')} € {convAcompte && convSolde ? '(payé ✅)' : convAcompte ? '(acompte ✅)' : '(en attente)'}</p>}
-                {convMrr && <p>🔄 MRR : {Number(convMrr).toLocaleString('fr-FR')} €/mois {convDureeIndef ? '(indéfini)' : convDuree ? `× ${convDuree} mois` : ''}</p>}
-              </div>
-            )}
 
             {/* Actions */}
             <div className="flex gap-2">
