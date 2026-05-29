@@ -105,18 +105,35 @@ export const PROSPECT_URGENCES: { value: ProspectUrgence; label: string; color: 
 ];
 
 export const TYPES_PRESTATION = [
-  'Création site web',
-  'Refonte site web',
-  'Maintenance web',
-  'SEO / Référencement',
-  'Application web',
-  'E-commerce',
-  'Climatisation',
-  'Électricité',
-  'Plomberie',
-  'Multi-services',
+  'Site vitrine & E-commerce',
+  'Application mobile & SaaS',
+  'Référencement SEO / GEO',
+  'Acquisition digitale',
+  'Maintenance & hébergement',
+  'Design & charte graphique',
+  'Page & avis Google',
+  'Accompagnement LinkedIn',
   'Autre',
 ];
+
+// Type de tarification
+export type TarifType = 'one_shot' | 'mensuel';
+
+export const TARIF_TYPES: { value: TarifType; label: string; emoji: string }[] = [
+  { value: 'one_shot', label: 'One-shot', emoji: '💵' },
+  { value: 'mensuel', label: 'Mensuel', emoji: '🔄' },
+];
+
+// Données financières pour la conversion prospect → client
+export interface ConversionData {
+  montant_one_shot: number;
+  acompte_paye: boolean;
+  solde_paye: boolean;
+  mrr: number;
+  mrr_date_debut: string | null;
+  duree_mois: number | null;
+  type_prestation: string | null;
+}
 
 export const SOURCES_PROSPECT = [
   'BNI',
@@ -164,6 +181,8 @@ export interface Prospect {
   description_prestation: string | null;
   adresse_chantier: string | null;
   tarif_propose: number | null;
+  tarif_type: TarifType | null;
+  duree_mois: number | null;
   date_premier_contact: string | null;
   date_relance: string | null;
   urgence: ProspectUrgence;
@@ -196,7 +215,15 @@ export interface Client {
   entreprise: string;
   email: string;
   telephone: string;
+  // --- Financier ---
+  montant_one_shot: number;
+  acompte_paye: boolean;
+  solde_paye: boolean;
   mrr: number;
+  mrr_date_debut: string | null;
+  duree_mois: number | null;
+  type_prestation: string | null;
+  // ---
   prospect_origine_id: string | null;
   notes: string | null;
   created_at: string;

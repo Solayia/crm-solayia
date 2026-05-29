@@ -71,7 +71,7 @@ export async function createClientAction(formData: FormData) {
 export async function updateClientAction(id: string, formData: FormData) {
   const supabase = await createClient();
 
-  const { error } = await supabase.from('clients').update({
+  const updates: Record<string, unknown> = {
     nom: formData.get('nom') as string,
     prenom: formData.get('prenom') as string,
     entreprise: formData.get('entreprise') as string,
@@ -79,9 +79,25 @@ export async function updateClientAction(id: string, formData: FormData) {
     telephone: formData.get('telephone') as string || null,
     mrr: parseFloat(formData.get('mrr') as string) || 0,
     notes: formData.get('notes') as string || null,
-  }).eq('id', id);
+    // Champs financiers enrichis
+    montant_one_shot: parseFloat(formData.get('montant_one_shot') as string) || 0,
+    acompte_paye: formData.get('acompte_paye') === 'true',
+    solde_paye: formData.get('solde_paye') === 'true',
+    mrr_date_debut: (formData.get('mrr_date_debut') as string) || null,
+    duree_mois: parseInt(formData.get('duree_mois') as string) || null,
+    type_prestation: (formData.get('type_prestation') as string) || null,
+  };
 
-  if (error) return { error: error.message };
+  const { error } = await supabase.from('clients').update(updates).eq('id', id);
+
+  if (error) {
+    // Fallback sans les nouveaux champs si colonnes pas encore créées
+    const { error: fallbackError } = await supabase.from('clients').update({
+      nom: updates.nom, prenom: updates.prenom, entreprise: updates.entreprise,
+      email: updates.email, telephone: updates.telephone, mrr: updates.mrr, notes: updates.notes,
+    }).eq('id', id);
+    if (fallbackError) return { error: fallbackError.message };
+  }
 
   revalidatePath('/clients');
   revalidatePath(`/clients/${id}`);

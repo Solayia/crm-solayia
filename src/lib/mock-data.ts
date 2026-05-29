@@ -56,6 +56,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p2',
@@ -96,6 +98,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p3',
@@ -136,6 +140,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p4',
@@ -176,6 +182,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p5',
@@ -216,6 +224,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: 'Couleur préféré : vert\nDouce, exigeante, lente',
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p6',
@@ -256,6 +266,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p7',
@@ -296,6 +308,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p8',
@@ -336,6 +350,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: "Douce, carré, à l’écoute, besoin de dev son business",
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p9',
@@ -376,6 +392,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p10',
@@ -416,6 +434,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p11',
@@ -456,6 +476,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p12',
@@ -496,6 +518,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p13',
@@ -536,6 +560,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p14',
@@ -576,6 +602,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p15',
@@ -616,6 +644,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p16',
@@ -656,6 +686,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p17',
@@ -696,6 +728,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p18',
@@ -736,6 +770,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p19',
@@ -776,6 +812,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p20',
@@ -816,6 +854,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p21',
@@ -856,6 +896,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p22',
@@ -896,6 +938,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p23',
@@ -936,6 +980,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p24',
@@ -976,6 +1022,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p25',
@@ -1016,6 +1064,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p26',
@@ -1056,6 +1106,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p27',
@@ -1096,6 +1148,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p28',
@@ -1136,6 +1190,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p29',
@@ -1176,6 +1232,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p30',
@@ -1216,6 +1274,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p31',
@@ -1256,6 +1316,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p32',
@@ -1296,6 +1358,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p33',
@@ -1336,6 +1400,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: 'Sympathique, sud ouest, gaillard (fête de condom)',
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p34',
@@ -1376,6 +1442,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p35',
@@ -1416,6 +1484,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p36',
@@ -1456,6 +1526,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p37',
@@ -1496,6 +1568,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p38',
@@ -1536,6 +1610,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p39',
@@ -1576,6 +1652,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p40',
@@ -1616,6 +1694,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p41',
@@ -1656,6 +1736,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p42',
@@ -1696,6 +1778,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p43',
@@ -1736,6 +1820,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
   {
     id: 'p44',
@@ -1776,6 +1862,8 @@ export const mockProspects: Prospect[] = [
     traits_personnalite: null,
     prospect_checklist: null,
     motif_perte: null,
+    tarif_type: null,
+    duree_mois: null,
   },
 ];
 

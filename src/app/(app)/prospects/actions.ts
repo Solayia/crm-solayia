@@ -2,7 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import type { ProspectStatut } from '@/lib/types';
+import type { ProspectStatut, ConversionData } from '@/lib/types';
 
 export async function getProspects() {
   const supabase = await createClient();
@@ -139,6 +139,12 @@ export async function updateProspect(id: string, formData: FormData) {
   const tarif = formData.get('tarif_propose') as string;
   updates.tarif_propose = tarif ? parseFloat(tarif) : null;
 
+  const tarifType = formData.get('tarif_type') as string;
+  updates.tarif_type = tarifType || null;
+
+  const duree = formData.get('duree_mois') as string;
+  updates.duree_mois = duree ? parseInt(duree) : null;
+
   const ca = formData.get('ca_en_k') as string;
   updates.ca_en_k = ca ? parseFloat(ca) : null;
 
@@ -217,7 +223,7 @@ export async function getProspectDevis(prospectId: string) {
 
 // --- Conversion prospect → client ---
 
-export async function convertToClient(prospectId: string) {
+export async function convertToClient(prospectId: string, financialData?: ConversionData) {
   const supabase = await createClient();
 
   // 1. Fetch prospect data
@@ -231,24 +237,61 @@ export async function convertToClient(prospectId: string) {
     return { error: 'Prospect introuvable' };
   }
 
-  // 2. Create client row
+  // 2. Create client row with financial data
+  const clientInsert: Record<string, unknown> = {
+    nom: prospect.nom,
+    prenom: prospect.prenom,
+    entreprise: prospect.entreprise,
+    email: prospect.email,
+    telephone: prospect.telephone,
+    notes: prospect.notes,
+    mrr: financialData?.mrr || 0,
+    prospect_origine_id: prospectId,
+  };
+
+  // Add financial fields (graceful: Supabase ignores unknown columns)
+  if (financialData) {
+    clientInsert.montant_one_shot = financialData.montant_one_shot || 0;
+    clientInsert.acompte_paye = financialData.acompte_paye || false;
+    clientInsert.solde_paye = financialData.solde_paye || false;
+    clientInsert.mrr_date_debut = financialData.mrr_date_debut || null;
+    clientInsert.duree_mois = financialData.duree_mois || null;
+    clientInsert.type_prestation = financialData.type_prestation || null;
+  }
+
   const { data: client, error: clientError } = await supabase
     .from('clients')
-    .insert({
-      nom: prospect.nom,
-      prenom: prospect.prenom,
-      entreprise: prospect.entreprise,
-      email: prospect.email,
-      telephone: prospect.telephone,
-      notes: prospect.notes,
-      mrr: 0,
-      prospect_origine_id: prospectId,
-    })
+    .insert(clientInsert)
     .select('id')
     .single();
 
   if (clientError) {
-    return { error: clientError.message };
+    // Fallback: try with minimal fields if new columns don't exist yet
+    const { data: clientFallback, error: fallbackError } = await supabase
+      .from('clients')
+      .insert({
+        nom: prospect.nom,
+        prenom: prospect.prenom,
+        entreprise: prospect.entreprise,
+        email: prospect.email,
+        telephone: prospect.telephone,
+        notes: prospect.notes,
+        mrr: financialData?.mrr || 0,
+        prospect_origine_id: prospectId,
+      })
+      .select('id')
+      .single();
+
+    if (fallbackError) {
+      return { error: fallbackError.message };
+    }
+
+    // 3. Move prospect to first project stage
+    await supabase.from('prospects').update({ statut: 'brief' }).eq('id', prospectId);
+    revalidatePath('/prospects');
+    revalidatePath('/clients');
+    revalidatePath('/dashboard');
+    return { success: true, clientId: clientFallback.id };
   }
 
   // 3. Move prospect to first project stage

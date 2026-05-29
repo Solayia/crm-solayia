@@ -6,7 +6,8 @@ import {
   Zap, Clock, Target, Mail, Phone, FileText, DollarSign,
   Thermometer, Timer, CalendarClock, RotateCcw, Send,
 } from 'lucide-react';
-import type { Prospect, Interaction } from '@/lib/types';
+import type { Prospect, Interaction, ConversionData } from '@/lib/types';
+import { TYPES_PRESTATION } from '@/lib/types';
 import { convertToClient, updateProspectChecklist, updateMotifPerte } from '@/app/(app)/prospects/actions';
 
 // --- SCORING ---
@@ -110,13 +111,38 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
   const [motifLoading, setMotifLoading] = useState(false);
   const [checklistLoading, setChecklistLoading] = useState(false);
 
+  // --- Conversion form state (pré-rempli depuis le prospect) ---
+  const [convPrestation, setConvPrestation] = useState(prospect.type_prestation || '');
+  const [convOneShot, setConvOneShot] = useState(
+    prospect.tarif_type !== 'mensuel' && prospect.tarif_propose ? String(prospect.tarif_propose) : ''
+  );
+  const [convAcompte, setConvAcompte] = useState(false);
+  const [convSolde, setConvSolde] = useState(false);
+  const [convMrr, setConvMrr] = useState(
+    prospect.tarif_type === 'mensuel' && prospect.tarif_propose ? String(prospect.tarif_propose) : ''
+  );
+  const [convMrrDebut, setConvMrrDebut] = useState(new Date().toISOString().slice(0, 10));
+  const [convDuree, setConvDuree] = useState(
+    prospect.duree_mois ? String(prospect.duree_mois) : ''
+  );
+  const [convDureeIndef, setConvDureeIndef] = useState(!prospect.duree_mois && prospect.tarif_type === 'mensuel');
+
   const checklist = prospect.prospect_checklist || {};
   const { score, details } = calculateScore(prospect, interactions);
 
   // --- Convert to client ---
   const handleConvert = async () => {
     setConvertLoading(true);
-    const result = await convertToClient(prospect.id);
+    const financialData: ConversionData = {
+      montant_one_shot: Number(convOneShot) || 0,
+      acompte_paye: convAcompte,
+      solde_paye: convSolde,
+      mrr: Number(convMrr) || 0,
+      mrr_date_debut: convMrr ? convMrrDebut : null,
+      duree_mois: convDureeIndef ? null : (Number(convDuree) || null),
+      type_prestation: convPrestation || null,
+    };
+    const result = await convertToClient(prospect.id, financialData);
     setConvertLoading(false);
     if (result.success) {
       setShowConvertModal(false);
@@ -380,11 +406,12 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
         )}
       </div>
 
-      {/* --- MODAL CONVERSION --- */}
+      {/* --- MODAL CONVERSION ENRICHIE --- */}
       {showConvertModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4" onClick={() => setShowConvertModal(false)}>
-          <div className="card p-6 w-full sm:max-w-md rounded-b-none sm:rounded-b-xl" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-center gap-3 mb-4">
+          <div className="card p-5 sm:p-6 w-full sm:max-w-lg rounded-b-none sm:rounded-b-xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5">
               <div className="w-12 h-12 rounded-xl bg-green-100 flex items-center justify-center">
                 <UserCheck className="w-6 h-6 text-green-600" />
               </div>
@@ -392,26 +419,120 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
                 <h3 className="text-lg font-bold text-gray-900">Convertir en client</h3>
                 <p className="text-sm text-gray-500">{prospect.entreprise || `${prospect.prenom} ${prospect.nom}`.trim()}</p>
               </div>
+              <button onClick={() => setShowConvertModal(false)} className="ml-auto p-2 text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
             </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-4 space-y-2">
-              <p className="text-sm text-gray-600">Cette action va :</p>
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckSquare className="w-4 h-4 text-green-500" />
-                  Créer une fiche client avec les infos du prospect
+            {/* Prestation */}
+            <div className="mb-4">
+              <label className="block text-xs font-semibold text-gray-700 mb-1">Prestation</label>
+              <select value={convPrestation} onChange={(e) => setConvPrestation(e.target.value)} className="input-field">
+                <option value="">—</option>
+                {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+              </select>
+            </div>
+
+            {/* Section One-shot */}
+            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 mb-4 space-y-3">
+              <h4 className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
+                <DollarSign className="w-3.5 h-3.5" />
+                Paiement one-shot
+              </h4>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Montant réel (€)</label>
+                <input
+                  type="number" step="0.01"
+                  value={convOneShot}
+                  onChange={(e) => setConvOneShot(e.target.value)}
+                  className="input-field"
+                  placeholder="1490.00"
+                />
+              </div>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={convAcompte}
+                    onChange={(e) => setConvAcompte(e.target.checked)}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <span className="text-sm text-gray-700">Acompte payé</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={convSolde}
+                    onChange={(e) => setConvSolde(e.target.checked)}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500"
+                  />
+                  <span className="text-sm text-gray-700">Solde payé</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Section MRR */}
+            <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 mb-5 space-y-3">
+              <h4 className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
+                <RotateCcw className="w-3.5 h-3.5" />
+                Récurrent (MRR)
+              </h4>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Montant mensuel (€/mois)</label>
+                  <input
+                    type="number" step="0.01"
+                    value={convMrr}
+                    onChange={(e) => setConvMrr(e.target.value)}
+                    className="input-field"
+                    placeholder="490.00"
+                  />
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckSquare className="w-4 h-4 text-green-500" />
-                  Passer le statut en &quot;Brief&quot; (pipeline projet)
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Date début MRR</label>
+                  <input
+                    type="date"
+                    value={convMrrDebut}
+                    onChange={(e) => setConvMrrDebut(e.target.value)}
+                    className="input-field"
+                  />
                 </div>
-                <div className="flex items-center gap-2 text-sm text-gray-700">
-                  <CheckSquare className="w-4 h-4 text-green-500" />
-                  Lier le client au prospect d&apos;origine
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Durée d&apos;engagement</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    value={convDureeIndef ? '' : convDuree}
+                    onChange={(e) => { setConvDuree(e.target.value); setConvDureeIndef(false); }}
+                    className="input-field flex-1"
+                    placeholder="12"
+                    disabled={convDureeIndef}
+                  />
+                  <span className="text-xs text-gray-500 shrink-0">mois</span>
+                  <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={convDureeIndef}
+                      onChange={(e) => { setConvDureeIndef(e.target.checked); if (e.target.checked) setConvDuree(''); }}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    />
+                    <span className="text-xs text-gray-600">Indéfinie</span>
+                  </label>
                 </div>
               </div>
             </div>
 
+            {/* Résumé */}
+            {(convOneShot || convMrr) && (
+              <div className="bg-gray-50 rounded-lg p-3 mb-4 text-sm text-gray-700 space-y-1">
+                <p className="font-semibold text-gray-900">Résumé financier :</p>
+                {convOneShot && <p>💵 One-shot : {Number(convOneShot).toLocaleString('fr-FR')} € {convAcompte && convSolde ? '(payé ✅)' : convAcompte ? '(acompte ✅)' : '(en attente)'}</p>}
+                {convMrr && <p>🔄 MRR : {Number(convMrr).toLocaleString('fr-FR')} €/mois {convDureeIndef ? '(indéfini)' : convDuree ? `× ${convDuree} mois` : ''}</p>}
+              </div>
+            )}
+
+            {/* Actions */}
             <div className="flex gap-2">
               <button onClick={() => setShowConvertModal(false)} className="btn-secondary flex-1">Annuler</button>
               <button onClick={handleConvert} disabled={convertLoading} className="btn-primary flex-1 !bg-green-600 hover:!bg-green-700">
@@ -420,7 +541,7 @@ export default function ProspectToolbox({ prospect, interactions, onUpdate }: Pr
                 ) : (
                   <UserCheck className="w-4 h-4" />
                 )}
-                {convertLoading ? 'Conversion...' : 'Convertir'}
+                {convertLoading ? 'Conversion...' : 'Convertir ✓'}
               </button>
             </div>
           </div>

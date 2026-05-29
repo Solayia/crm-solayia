@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, Calendar, Clock, X, Plus } from 'lucide-react';
+import { ArrowLeft, Save, Trash2, Building2, Mail, Phone, Euro, Calendar, Clock, X, Plus, DollarSign, RotateCcw, CheckCircle, XCircle } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
-import { PROJET_STATUTS } from '@/lib/types';
+import { PROJET_STATUTS, TYPES_PRESTATION } from '@/lib/types';
 import type { ProjetStatut } from '@/lib/types';
 import { getClient, getClientProjets, updateClientAction, deleteClientAction } from '../actions';
 import { updateProjetAction, createProjetAction, deleteProjet } from '../../projets/actions';
@@ -30,6 +30,12 @@ export default function ClientDetailPage() {
   const [email, setEmail] = useState('');
   const [telephone, setTelephone] = useState('');
   const [mrr, setMrr] = useState('0');
+  const [montantOneShot, setMontantOneShot] = useState('0');
+  const [acomptePaye, setAcomptePaye] = useState(false);
+  const [soldePaye, setSoldePaye] = useState(false);
+  const [mrrDateDebut, setMrrDateDebut] = useState('');
+  const [dureeMois, setDureeMois] = useState('');
+  const [typePrestation, setTypePrestation] = useState('');
   const [notes, setNotes] = useState('');
 
   const loadData = useCallback(async () => {
@@ -45,6 +51,12 @@ export default function ClientDetailPage() {
       setEmail(c.email || '');
       setTelephone(c.telephone || '');
       setMrr(String(c.mrr || 0));
+      setMontantOneShot(String(c.montant_one_shot || 0));
+      setAcomptePaye(!!c.acompte_paye);
+      setSoldePaye(!!c.solde_paye);
+      setMrrDateDebut(c.mrr_date_debut || '');
+      setDureeMois(c.duree_mois ? String(c.duree_mois) : '');
+      setTypePrestation(c.type_prestation || '');
       setNotes(c.notes || '');
     }
     setProjets(p);
@@ -62,6 +74,12 @@ export default function ClientDetailPage() {
     formData.set('email', email);
     formData.set('telephone', telephone);
     formData.set('mrr', mrr);
+    formData.set('montant_one_shot', montantOneShot);
+    formData.set('acompte_paye', String(acomptePaye));
+    formData.set('solde_paye', String(soldePaye));
+    formData.set('mrr_date_debut', mrrDateDebut);
+    formData.set('duree_mois', dureeMois);
+    formData.set('type_prestation', typePrestation);
     formData.set('notes', notes);
 
     const result = await updateClientAction(clientId, formData);
@@ -189,15 +207,96 @@ export default function ClientDetailPage() {
             </div>
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
-              <Euro className="w-3 h-3" /> MRR (EUR/mois)
-            </label>
-            <input type="number" step="0.01" value={mrr} onChange={(e) => setMrr(e.target.value)} className="input-field max-w-xs" />
-          </div>
-          <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Notes</label>
             <textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} className="input-field" />
           </div>
+        </div>
+      </div>
+
+      {/* Section financière */}
+      <div className="card p-5 sm:p-6">
+        <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+          <Euro className="w-4 h-4 text-brand-600" />
+          Situation financière
+        </h2>
+        <div className="space-y-4">
+          {/* Prestation */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Prestation</label>
+            <select value={typePrestation} onChange={(e) => setTypePrestation(e.target.value)} className="input-field">
+              <option value="">—</option>
+              {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+            </select>
+          </div>
+
+          {/* One-shot */}
+          <div className="p-4 bg-amber-50 rounded-xl border border-amber-200 space-y-3">
+            <h4 className="text-xs font-bold text-amber-800 flex items-center gap-1.5">
+              <DollarSign className="w-3.5 h-3.5" />
+              Paiement one-shot
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Montant (€)</label>
+                <input type="number" step="0.01" value={montantOneShot} onChange={(e) => setMontantOneShot(e.target.value)} className="input-field" />
+              </div>
+              <button
+                type="button"
+                onClick={() => setAcomptePaye(!acomptePaye)}
+                className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
+                  acomptePaye ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'
+                }`}
+              >
+                {acomptePaye ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                Acompte {acomptePaye ? 'payé ✅' : 'en attente'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setSoldePaye(!soldePaye)}
+                className={`flex items-center gap-2 p-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
+                  soldePaye ? 'border-green-400 bg-green-50 text-green-700' : 'border-gray-200 bg-white text-gray-500'
+                }`}
+              >
+                {soldePaye ? <CheckCircle className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+                Solde {soldePaye ? 'payé ✅' : 'en attente'}
+              </button>
+            </div>
+          </div>
+
+          {/* MRR */}
+          <div className="p-4 bg-blue-50 rounded-xl border border-blue-200 space-y-3">
+            <h4 className="text-xs font-bold text-blue-800 flex items-center gap-1.5">
+              <RotateCcw className="w-3.5 h-3.5" />
+              Récurrent (MRR)
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Montant (€/mois)</label>
+                <input type="number" step="0.01" value={mrr} onChange={(e) => setMrr(e.target.value)} className="input-field" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Date début</label>
+                <input type="date" value={mrrDateDebut} onChange={(e) => setMrrDateDebut(e.target.value)} className="input-field" />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">Durée (mois)</label>
+                <input type="number" value={dureeMois} onChange={(e) => setDureeMois(e.target.value)} className="input-field" placeholder="Indéfinie" />
+              </div>
+            </div>
+          </div>
+
+          {/* Résumé CA */}
+          {(Number(montantOneShot) > 0 || Number(mrr) > 0) && (
+            <div className="bg-gray-50 rounded-lg p-3 text-sm space-y-1">
+              <p className="font-semibold text-gray-900">Résumé CA client :</p>
+              {Number(montantOneShot) > 0 && (
+                <p className="text-gray-700">💵 One-shot : {Number(montantOneShot).toLocaleString('fr-FR')} € {acomptePaye && soldePaye ? '(payé ✅)' : acomptePaye ? '(acompte ✅)' : '(en attente)'}</p>
+              )}
+              {Number(mrr) > 0 && (
+                <p className="text-gray-700">🔄 MRR : {Number(mrr).toLocaleString('fr-FR')} €/mois {dureeMois ? `× ${dureeMois} mois` : '(indéfini)'}</p>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

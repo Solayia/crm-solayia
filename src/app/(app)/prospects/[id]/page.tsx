@@ -11,11 +11,11 @@ import {
 } from 'lucide-react';
 import { formatCurrency, formatDate, getInitials } from '@/lib/utils';
 import {
-  PROSPECT_STATUTS, PROSPECT_URGENCES, TYPES_PRESTATION,
+  PROSPECT_STATUTS, PROSPECT_URGENCES, TYPES_PRESTATION, TARIF_TYPES,
   PROSPECT_TEMPERATURES, TYPES_CONTACT, SOURCES_PROSPECT,
   PIPELINE_COMMERCIAL, PIPELINE_PROJET,
 } from '@/lib/types';
-import type { ProspectStatut, ProspectUrgence, ProspectTemperature, TypeContact } from '@/lib/types';
+import type { ProspectStatut, ProspectUrgence, ProspectTemperature, TypeContact, TarifType } from '@/lib/types';
 import {
   getProspect, getProfiles, updateProspect, deleteProspect,
   getProspectInteractions, createInteraction, deleteInteraction,
@@ -74,6 +74,9 @@ export default function ProspectDetailPage() {
   const [descriptionPrestation, setDescriptionPrestation] = useState('');
   const [adresseChantier, setAdresseChantier] = useState('');
   const [tarifPropose, setTarifPropose] = useState('');
+  const [tarifType, setTarifType] = useState<TarifType | ''>('');
+  const [dureeMois, setDureeMois] = useState('');
+  const [dureeIndefinie, setDureeIndefinie] = useState(false);
   const [urgence, setUrgence] = useState<ProspectUrgence>('normale');
   const [datePremierContact, setDatePremierContact] = useState('');
   const [dateRelance, setDateRelance] = useState('');
@@ -119,6 +122,9 @@ export default function ProspectDetailPage() {
       setDescriptionPrestation(p.description_prestation || '');
       setAdresseChantier(p.adresse_chantier || '');
       setTarifPropose(p.tarif_propose ? String(p.tarif_propose) : '');
+      setTarifType(p.tarif_type || '');
+      setDureeMois(p.duree_mois ? String(p.duree_mois) : '');
+      setDureeIndefinie(p.tarif_type === 'mensuel' && !p.duree_mois);
       setUrgence(p.urgence || 'normale');
       setDatePremierContact(p.date_premier_contact || '');
       setDateRelance(p.date_relance || '');
@@ -165,6 +171,8 @@ export default function ProspectDetailPage() {
     formData.set('description_prestation', descriptionPrestation);
     formData.set('adresse_chantier', adresseChantier);
     formData.set('tarif_propose', tarifPropose);
+    formData.set('tarif_type', tarifType);
+    formData.set('duree_mois', dureeIndefinie ? '' : dureeMois);
     formData.set('urgence', urgence);
     formData.set('date_premier_contact', datePremierContact);
     formData.set('date_relance', dateRelance);
@@ -563,21 +571,103 @@ export default function ProspectDetailPage() {
           Prestation & Tarif
         </h2>
         <div className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">Type de prestation</label>
-              <select value={typePrestation} onChange={(e) => setTypePrestation(e.target.value)} className="input-field">
-                <option value="">—</option>
-                {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1 flex items-center gap-1">
-                <Euro className="w-3 h-3" /> Tarif proposé (EUR)
-              </label>
-              <input type="number" step="0.01" value={tarifPropose} onChange={(e) => setTarifPropose(e.target.value)} className="input-field" placeholder="0.00" />
-            </div>
+          {/* Type prestation */}
+          <div>
+            <label className="block text-xs font-medium text-gray-600 mb-1">Type de prestation</label>
+            <select value={typePrestation} onChange={(e) => setTypePrestation(e.target.value)} className="input-field">
+              <option value="">—</option>
+              {TYPES_PRESTATION.map((t) => (<option key={t} value={t}>{t}</option>))}
+            </select>
           </div>
+
+          {/* Tarification structurée */}
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200 space-y-4">
+            <div className="flex items-center gap-2 mb-1">
+              <Euro className="w-4 h-4 text-brand-600" />
+              <span className="text-xs font-semibold text-gray-700">Tarification estimée</span>
+            </div>
+
+            {/* Type de tarif : boutons one-shot / mensuel */}
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1.5">Type de tarif</label>
+              <div className="flex gap-2">
+                {TARIF_TYPES.map((t) => (
+                  <button
+                    key={t.value}
+                    type="button"
+                    onClick={() => setTarifType(t.value)}
+                    className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-lg border-2 text-sm font-medium transition-all ${
+                      tarifType === t.value
+                        ? 'border-brand-400 bg-brand-50 text-brand-700'
+                        : 'border-gray-200 bg-white text-gray-500 hover:border-gray-300'
+                    }`}
+                  >
+                    {t.emoji} {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Montant estimé */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-600 mb-1">
+                  Montant estimé {tarifType === 'mensuel' ? '(€/mois)' : '(€)'}
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={tarifPropose}
+                  onChange={(e) => setTarifPropose(e.target.value)}
+                  className="input-field"
+                  placeholder={tarifType === 'mensuel' ? '490.00' : '1490.00'}
+                />
+              </div>
+
+              {/* Durée (visible si mensuel) */}
+              {tarifType === 'mensuel' && (
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Durée</label>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      value={dureeIndefinie ? '' : dureeMois}
+                      onChange={(e) => { setDureeMois(e.target.value); setDureeIndefinie(false); }}
+                      className="input-field flex-1"
+                      placeholder="12"
+                      disabled={dureeIndefinie}
+                    />
+                    <span className="text-xs text-gray-500 shrink-0">mois</span>
+                    <label className="flex items-center gap-1.5 shrink-0 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={dureeIndefinie}
+                        onChange={(e) => { setDureeIndefinie(e.target.checked); if (e.target.checked) setDureeMois(''); }}
+                        className="rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                      />
+                      <span className="text-xs text-gray-600">Indéfinie</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Résumé CA estimé */}
+            {tarifPropose && (
+              <div className="flex items-center gap-2 pt-2 border-t border-gray-200">
+                <span className="text-xs font-medium text-gray-500">📊 CA estimé :</span>
+                <span className="text-sm font-bold text-brand-700">
+                  {tarifType === 'mensuel' && !dureeIndefinie && dureeMois
+                    ? `${Number(tarifPropose).toLocaleString('fr-FR')} €/mois × ${dureeMois} mois = ${(Number(tarifPropose) * Number(dureeMois)).toLocaleString('fr-FR')} €`
+                    : tarifType === 'mensuel'
+                      ? `${Number(tarifPropose).toLocaleString('fr-FR')} €/mois (récurrent)`
+                      : `${Number(tarifPropose).toLocaleString('fr-FR')} € (one-shot)`
+                  }
+                </span>
+              </div>
+            )}
+          </div>
+
           <div>
             <label className="block text-xs font-medium text-gray-600 mb-1">Description de la prestation</label>
             <textarea value={descriptionPrestation} onChange={(e) => setDescriptionPrestation(e.target.value)} rows={3} className="input-field" placeholder="Détail de la prestation souhaitée ou proposée..." />
