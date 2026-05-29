@@ -18,14 +18,25 @@ export async function getDashboardData() {
   const devis = devisRes.data ?? [];
   const interactions = interactionsRes.data ?? [];
 
-  const mrrTotal = clients.reduce((sum: number, c: any) => sum + (c.mrr || 0), 0);
+  const mrrTotal = clients.reduce((sum: number, c: any) => {
+    // Priorité aux multi-prestations JSON pour le MRR
+    if (c.prestations && Array.isArray(c.prestations) && c.prestations.length > 0) {
+      return sum + c.prestations
+        .filter((pr: any) => pr.mode === 'recurrent')
+        .reduce((s: number, pr: any) => s + (pr.montant || 0), 0);
+    }
+    return sum + (c.mrr || 0);
+  }, 0);
   const prospectsActifs = prospects.filter((p: any) => !['suivi', 'termine', 'perdu'].includes(p.statut));
   const devisEnCours = devis.filter((d: any) => ['brouillon', 'envoye'].includes(d.statut));
 
   // --- CA 2026 calculations ---
   const now = new Date();
+  const annee = now.getFullYear();
+  const debutAnnee = new Date(annee, 0, 1);    // 1er janvier
+  const finAnnee = new Date(annee, 11, 31);     // 31 décembre
 
-  // === CA Réalisé (payé) depuis les clients ===
+  // === CA Réalisé (payé) depuis les clients — borné à l'année en cours ===
   let caGenere2026 = 0;
 
   for (const c of clients as any[]) {
@@ -33,18 +44,23 @@ export async function getDashboardData() {
     if (c.prestations && Array.isArray(c.prestations) && c.prestations.length > 0) {
       for (const pr of c.prestations) {
         if (pr.mode === 'one_shot') {
+          // One-shot : on ne compte que si le client a été créé cette année
+          const clientYear = new Date(c.created_at).getFullYear();
+          if (clientYear !== annee) continue;
           const acompteMt = pr.acompte_montant || 0;
           const soldeMt = (pr.montant || 0) - acompteMt;
           if (pr.acompte_paye) caGenere2026 += acompteMt;
           if (pr.solde_paye) caGenere2026 += soldeMt;
         } else if (pr.mode === 'recurrent' && pr.date_debut) {
+          // Récurrent : compter seulement les mois de l'année en cours
           const start = new Date(pr.date_debut);
           const end = pr.date_fin ? new Date(pr.date_fin) : null;
+          const effectiveStart = start < debutAnnee ? debutAnnee : start;
           const effectiveEnd = end && end < now ? end : now;
-          if (effectiveEnd > start) {
-            const months = (effectiveEnd.getFullYear() - start.getFullYear()) * 12
-              + (effectiveEnd.getMonth() - start.getMonth())
-              + (effectiveEnd.getDate() >= start.getDate() ? 1 : 0);
+          if (effectiveEnd > effectiveStart) {
+            const months = (effectiveEnd.getFullYear() - effectiveStart.getFullYear()) * 12
+              + (effectiveEnd.getMonth() - effectiveStart.getMonth())
+              + (effectiveEnd.getDate() >= effectiveStart.getDate() ? 1 : 0);
             caGenere2026 += (pr.montant || 0) * Math.max(0, months);
           }
         }
@@ -52,13 +68,13 @@ export async function getDashboardData() {
     } else {
       // Fallback legacy
       const clientCreated = new Date(c.created_at);
-      if (clientCreated.getFullYear() === 2026 && (c.acompte_paye || c.solde_paye)) {
+      if (clientCreated.getFullYear() === annee && (c.acompte_paye || c.solde_paye)) {
         caGenere2026 += c.montant_one_shot || 0;
       }
       if (c.mrr && c.mrr > 0 && c.mrr_date_debut) {
         const mrrStart = new Date(c.mrr_date_debut);
-        const effectiveStart = mrrStart < new Date('2026-01-01') ? new Date('2026-01-01') : mrrStart;
-        let effectiveEnd = now < new Date('2026-12-31') ? now : new Date('2026-12-31');
+        const effectiveStart = mrrStart < debutAnnee ? debutAnnee : mrrStart;
+        let effectiveEnd = now < finAnnee ? now : finAnnee;
         if (c.duree_mois) {
           const mrrEndDate = new Date(mrrStart);
           mrrEndDate.setMonth(mrrEndDate.getMonth() + c.duree_mois);
@@ -99,11 +115,14 @@ export async function getDashboardData() {
     }
   }
 
-  // 2) Depuis les clients : ce qui n'est pas encore payé
+  // 2) Depuis les clients : ce qui n'est pas encore payé (borné à l'année en cours)
   for (const c of clients as any[]) {
     if (c.prestations && Array.isArray(c.prestations) && c.prestations.length > 0) {
       for (const pr of c.prestations) {
         if (pr.mode === 'one_shot') {
+          // One-shot impayé : seulement si client créé cette année
+          const clientYear = new Date(c.created_at).getFullYear();
+          if (clientYear !== annee) continue;
           const acompteMt = pr.acompte_montant || 0;
           const soldeMt = (pr.montant || 0) - acompteMt;
           if (!pr.acompte_paye) caEstime += acompteMt;
@@ -111,7 +130,9 @@ export async function getDashboardData() {
         } else if (pr.mode === 'recurrent' && pr.date_debut) {
           const end = pr.date_fin ? new Date(pr.date_fin) : null;
           if (!end || end > now) {
-            const futureEnd = end || new Date(now.getFullYear(), 11, 31);
+            // Borner la fin à décembre de l'année en cours maximum
+            let futureEnd = end || finAnnee;
+            if (futureEnd > finAnnee) futureEnd = finAnnee;
             const futureMonths = (futureEnd.getFullYear() - now.getFullYear()) * 12
               + (futureEnd.getMonth() - now.getMonth());
             caEstime += (pr.montant || 0) * Math.max(0, futureMonths);

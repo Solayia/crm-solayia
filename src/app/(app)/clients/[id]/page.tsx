@@ -8,6 +8,7 @@ import { PROJET_STATUTS, TYPES_PRESTATION } from '@/lib/types';
 import type { ProjetStatut, PrestationLigneClient } from '@/lib/types';
 import { getClient, getClientProjets, updateClientAction, deleteClientAction } from '../actions';
 import { updateProjetAction, createProjetAction, deleteProjet } from '../../projets/actions';
+import { calculerResumeFinancier } from '@/lib/finance';
 
 export default function ClientDetailPage() {
   const params = useParams();
@@ -342,34 +343,7 @@ export default function ClientDetailPage() {
 
           {/* Résumé global */}
           {prestations.length > 0 && prestations.some(pr => pr.montant > 0) && (() => {
-            let realise = 0;
-            let estime = 0;
-            for (const pr of prestations) {
-              if (pr.mode === 'one_shot') {
-                const acompteMt = pr.acompte_montant || 0;
-                const soldeMt = (pr.montant || 0) - acompteMt;
-                if (pr.acompte_paye) realise += acompteMt;
-                else estime += acompteMt;
-                if (pr.solde_paye) realise += soldeMt;
-                else estime += soldeMt;
-              } else if (pr.mode === 'recurrent' && pr.date_debut) {
-                const start = new Date(pr.date_debut);
-                const now = new Date();
-                const end = pr.date_fin ? new Date(pr.date_fin) : null;
-                const effectiveEnd = end && end < now ? end : now;
-                if (effectiveEnd > start) {
-                  const moisEcoules = (effectiveEnd.getFullYear() - start.getFullYear()) * 12 + (effectiveEnd.getMonth() - start.getMonth()) + (effectiveEnd.getDate() >= start.getDate() ? 1 : 0);
-                  realise += pr.montant * Math.max(0, moisEcoules);
-                }
-                if (!end || end > now) {
-                  const futureEnd = end || new Date(now.getFullYear(), 11, 31);
-                  const futureMonths = (futureEnd.getFullYear() - now.getFullYear()) * 12 + (futureEnd.getMonth() - now.getMonth());
-                  estime += pr.montant * Math.max(0, futureMonths);
-                }
-              } else {
-                estime += pr.montant || 0;
-              }
-            }
+            const { realise, estime } = calculerResumeFinancier(prestations);
             return (
               <div className="bg-gray-50 rounded-lg p-4 space-y-2">
                 <p className="font-semibold text-gray-900 text-sm">Résumé financier</p>

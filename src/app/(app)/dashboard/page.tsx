@@ -90,7 +90,7 @@ export default function DashboardPage() {
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">CA généré</span>
             </div>
             <div className="text-xl font-bold text-brand-700">{formatCurrency(caGenere)}</div>
-            <p className="text-[11px] text-gray-400 mt-0.5">Réel encaissé</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">Encaissé en {new Date().getFullYear()}</p>
           </div>
           <div className="px-6 py-4 text-center border-r border-gray-100">
             <div className="flex items-center justify-center gap-1.5 mb-1">
@@ -98,7 +98,7 @@ export default function DashboardPage() {
               <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">CA estimé</span>
             </div>
             <div className="text-xl font-bold text-amber-600">{formatCurrency(caEstime)}</div>
-            <p className="text-[11px] text-gray-400 mt-0.5">Prospects en cours</p>
+            <p className="text-[11px] text-gray-400 mt-0.5">Prospects + impayés clients</p>
           </div>
           <div className="px-6 py-4 text-center">
             <div className="flex items-center justify-center gap-1.5 mb-1">
